@@ -42,7 +42,7 @@ MODULE Basis_DP_m
     PROCEDURE :: Write => Write_Basis_DP
   END TYPE Basis_DP_t
 
-  PUBLIC :: Basis_DP_t,init_Basis_DP
+  PUBLIC :: Pbasis_t,Basis_DP_t,init_Basis_DP
 
   CONTAINS
   RECURSIVE FUNCTION init_Basis_DP(nb_basis) RESULT (basis)
@@ -52,6 +52,8 @@ MODULE Basis_DP_m
     integer, intent(in) :: nb_basis
 
     integer :: i,nb,nq,ndim
+
+    !write(out_unit,*) 'Beginning init_Basis_DP'
 
     basis%name = 'DP'
 

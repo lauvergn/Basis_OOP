@@ -38,6 +38,8 @@ MODULE BasisInput_m
     real (kind=Rkind)              :: Q0  = ZERO
     real (kind=Rkind)              :: ScQ = ONE
 
+    integer                        :: LB = -1
+    integer                        :: LG = -1
   CONTAINS
     PROCEDURE :: Read    => Read_BasisInput
     PROCEDURE :: Write   => Write_BasisInput
@@ -52,11 +54,11 @@ MODULE BasisInput_m
 
     CLASS (BasisInput_t), intent(inout) :: BasisInput
 
-    integer            :: nb,nq,nb_basis
+    integer            :: nb,nq,nb_basis,LB,LG
     character (len=50) :: name
     real (kind=Rkind)  :: Q0,ScQ
 
-    namelist / basis / nb,nq,name,Q0,ScQ,nb_basis
+    namelist / basis / nb,nq,name,Q0,ScQ,nb_basis,LB,LG
 
     nb       = 0
     nq       = 0
@@ -64,6 +66,8 @@ MODULE BasisInput_m
     name     = '0'
     Q0       = ZERO
     ScQ      = ONE
+    LB       = -1
+    LG       = -1
 
     read(*,basis)
     !write(*,basis)
@@ -74,7 +78,8 @@ MODULE BasisInput_m
     BasisInput%name     = TO_lowercase(trim(adjustl(name)))
     BasisInput%Q0       = Q0
     BasisInput%ScQ      = ScQ
-
+    BasisInput%LB       = LB
+    BasisInput%LG       = LG
   END SUBROUTINE Read_BasisInput
   SUBROUTINE Write_BasisInput(BasisInput)
     USE QDUtil_m
@@ -93,6 +98,8 @@ MODULE BasisInput_m
     write(out_unit,*) 'nq =',BasisInput%nq
     write(out_unit,*) 'Q0 =',BasisInput%Q0
     write(out_unit,*) 'ScQ=',BasisInput%ScQ
+    write(out_unit,*) 'LB =',BasisInput%LB
+    write(out_unit,*) 'LG =',BasisInput%LG
     write(out_unit,*) '-------------------------------------'
     write(out_unit,*) '--- END BasisInput ------------------'
     write(out_unit,*) '-------------------------------------'

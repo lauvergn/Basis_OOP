@@ -26,48 +26,50 @@
 ! SOFTWARE.
 !===============================================================================
 !===============================================================================
-MODULE Basis_HO_m
-  USE QDUtil_m, ONLY : Rkind
-  USE Basis_base_m
+MODULE Basis_SBG_m
+  USE Basis_DP_m
   IMPLICIT NONE
   PRIVATE
 
-  TYPE, EXTENDS (Basis_t) :: Basis_HO_t
-    real (kind=Rkind) :: Q0
-    real (kind=Rkind) :: ScQ
+  TYPE, EXTENDS (Basis_DP_t) :: Basis_SBG_t
+    integer :: LB = -1
+    integer :: LG = -1
+    TYPE (Pbasis_t), allocatable :: tab_SBG_Pbasis(:,:)
   CONTAINS
-    PROCEDURE :: Write  => Write_Basis_HO
-  END TYPE Basis_HO_t
+    PROCEDURE :: Write => Write_Basis_SBG
+  END TYPE Basis_SBG_t
 
-  PUBLIC :: Basis_HO_t,init_Basis_HO
+  PUBLIC :: Basis_SBG_t,init_Basis_SBG
 
   CONTAINS
-  FUNCTION init_Basis_HO(nb,nq,Q0,ScQ) RESULT(basis)
+  FUNCTION init_Basis_SBG(nb_basis) RESULT (basis)
+    USE QDUtil_m
+    TYPE (Basis_SBG_t)   :: basis
+    integer, intent(in) :: nb_basis
+
+
+    integer :: i,nb,nq,ndim
+
+    !write(out_unit,*) 'Beginning init_Basis_SBG'
+
+    basis%name = 'SBG'
+    IF (nb_basis < 1) STOP ' ERROR in init_Basis_SBG: nb_basis < 1'
+    allocate(basis%tab_Pbasis(nb_basis))
+
+  END FUNCTION init_Basis_SBG
+
+  SUBROUTINE Write_Basis_SBG(basis)
     USE QDUtil_m
 
-    integer,           intent(in) :: nb,nq
-    real (kind=Rkind), intent(in) :: Q0,ScQ
+    CLASS (Basis_SBG_t), intent(in) :: basis
 
-    TYPE (Basis_HO_t) :: basis
+    write(out_unit,*) basis%tab_layer,'---- SBG ----------------------------'
+    CALL basis%Basis_DP_t%write()
 
-    !write(out_unit,*) 'Beginning init_Basis_HO'
+    write(out_unit,*) basis%tab_layer,'SBG: nb_basis',size(basis%tab_Pbasis)
+    write(out_unit,*) basis%tab_layer,'LB=',basis%LB
+    write(out_unit,*) basis%tab_layer,'LG=',basis%LG
+    write(out_unit,*) basis%tab_layer,'---- END SBG -------------------------'
 
-    basis%basis_t = Init_Basis(nb=nb,nq=nq,ndim=1,name='HO')
-
-    basis%Q0   = Q0
-    basis%ScQ  = ScQ
-
-  END FUNCTION init_Basis_HO
-  SUBROUTINE Write_Basis_HO(basis)
-    USE QDUtil_m, ONLY : Rkind, out_unit
-
-    CLASS (Basis_HO_t), intent(in) :: basis
-
-    write(out_unit,*) basis%tab_layer,'-------------------------------------'
-    CALL basis%Basis_t%write()
-    write(out_unit,*) basis%tab_layer,'Q0= ',basis%Q0
-    write(out_unit,*) basis%tab_layer,'ScQ=',basis%ScQ
-    write(out_unit,*) basis%tab_layer,'-------------------------------------'
-
-  END SUBROUTINE Write_Basis_HO
-END MODULE Basis_HO_m
+  END SUBROUTINE Write_Basis_SBG
+END MODULE Basis_SBG_m

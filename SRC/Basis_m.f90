@@ -30,6 +30,7 @@ MODULE Basis_m
   USE Basis_base_m
   USE Basis_HO_m
   USE Basis_DP_m
+  USE Basis_SBG_m
   IMPLICIT NONE
 
 
@@ -52,12 +53,18 @@ CONTAINS
 
     SELECT CASE (BasisIn%name)
     CASE ('ho')
+      write(out_unit,*) 'HO basis'
       ! its means only one primitive basis
       allocate(Basis_HO_t :: basis)
       basis = init_Basis_HO(nb=BasisIn%nb,nq=BasisIn%nq,Q0=BasisIn%Q0,ScQ=BasisIn%ScQ)
     CASE ('dp')
+      write(out_unit,*) 'DP basis'
       allocate(Basis_DP_t :: basis)
       basis = init_Basis_DP(nb_basis=BasisIn%nb_basis)
+    CASE ('sbg')
+      write(out_unit,*) 'SBG basis'
+      allocate(Basis_SBG_t :: basis)
+      basis = init_Basis_SBG(nb_basis=BasisIn%nb_basis)
     CASE default
       STOP 'no default'
     END SELECT

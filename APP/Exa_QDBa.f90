@@ -3,7 +3,6 @@ PROGRAM test_OO
   USE Basis_m
   IMPLICIT NONE
 
-
   CLASS (Basis_t),  allocatable :: basis_nD
 
 

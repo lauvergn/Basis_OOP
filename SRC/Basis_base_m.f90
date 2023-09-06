@@ -32,9 +32,9 @@ MODULE Basis_base_m
   PRIVATE
 
   TYPE Basis_t
-    integer :: nb
-    integer :: nq
-    integer :: ndim
+    integer :: nb   = 0
+    integer :: nq   = 0
+    integer :: ndim = 0
     character (len=:), allocatable :: name
 
     integer :: layer = -1

@@ -147,7 +147,7 @@ $(info ***********************************************************************)
 
 VPATH = $(MAIN_DIR):$(TESTS_DIR):$(SRC_DIR)
 
-SRCFILES=BasisInput_m.f90 Basis_DP_m.f90 Basis_HO_m.f90 Basis_base_m.f90 Basis_m.f90
+SRCFILES=BasisInput_m.f90 Basis_SBG_m.f90 Basis_DP_m.f90 Basis_HO_m.f90 Basis_base_m.f90 Basis_m.f90
 
 OBJ0=${SRCFILES:.f90=.o}
 OBJ=$(addprefix $(OBJ_DIR)/, $(OBJ0))
@@ -249,7 +249,8 @@ $(QDLIBA):
 $(OBJ_DIR)/Exa_QDBa.o:      $(LIBQDBa).a
 $(LIBQDBa).a:               $(OBJ_lib)
 #
-$(OBJ_DIR)/Basis_m.o:       $(OBJ_DIR)/Basis_DP_m.o
+$(OBJ_DIR)/Basis_m.o:       $(OBJ_DIR)/Basis_SBG_m.o
+$(OBJ_DIR)/Basis_SBG_m.o:   $(OBJ_DIR)/Basis_DP_m.o
 $(OBJ_DIR)/Basis_DP_m.o:    $(OBJ_DIR)/Basis_HO_m.o $(OBJ_DIR)/Basis_base_m.o $(OBJ_DIR)/BasisInput_m.o $(QDLIBA)
 $(OBJ_DIR)/Basis_HO_m.o:    $(OBJ_DIR)/Basis_base_m.o $(QDLIBA)
 $(OBJ_DIR)/Basis_base_m.o:  $(OBJ_DIR)/BasisInput_m.o $(QDLIBA)

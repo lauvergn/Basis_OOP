@@ -1,6 +1,6 @@
   &basis nb_basis=3 name='DP' /
     &basis nb=1 nq=3 name='HO' Q0=0. ScQ=1. /
-    &basis nb_basis=2 name='DP' /
+    &basis nb_basis=2 name='SBG' /
       &basis nb=2 nq=4 name='HO' Q0=-1. ScQ=2. /
       &basis nb=1 nq=3 name='HO' Q0=1. ScQ=2. /
     &basis nb=6 nq=5 name='HO' Q0=0. ScQ=3. /
