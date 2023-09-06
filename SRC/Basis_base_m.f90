@@ -36,6 +36,9 @@ MODULE Basis_base_m
     integer :: nq
     integer :: ndim
     character (len=:), allocatable :: name
+
+    integer :: layer = -1
+    character (len=:), allocatable :: tab_layer
   CONTAINS
     PROCEDURE :: Write  => Write_Basis_base
   END TYPE Basis_t
@@ -49,14 +52,12 @@ MODULE Basis_base_m
   CONTAINS
   FUNCTION Init_Basis(nb,nq,ndim,name) RESULT(basis)
     USE QDUtil_m, ONLY : Rkind
-    CLASS (Basis_t), allocatable :: basis
+    TYPE (Basis_t) :: basis
 
     integer,           intent(in) :: nb
     integer,           intent(in) :: nq
     integer,           intent(in) :: ndim
     character (len=*), intent(in) :: name
-
-    allocate(Basis_t :: basis)
   
     basis%nb   = nb
     basis%nq   = nq
@@ -75,15 +76,20 @@ MODULE Basis_base_m
     USE QDUtil_m, ONLY : Rkind, out_unit
     CLASS (Basis_t), intent(in) :: basis
 
-    write(out_unit,*) '-------------------------------------'
+    character (len=4), parameter :: tab='    '
+    integer :: i
+
+    write(out_unit,*) basis%tab_layer,'-------------------------------------'
     IF (allocated(basis%name)) THEN
-      write(out_unit,*) 'name: ',basis%name
+      write(out_unit,*) basis%tab_layer,'name: ',basis%name
     ELSE
-      write(out_unit,*) 'name: not initialized!'
+      write(out_unit,*) basis%tab_layer,'name: not initialized!'
     END IF
-    write(out_unit,*) 'ndim=',basis%ndim
-    write(out_unit,*) 'nb=  ',basis%nb
-    write(out_unit,*) 'nq=  ',basis%nq
-    write(out_unit,*) '-------------------------------------'
+    write(out_unit,*) basis%tab_layer,'ndim=  ',basis%ndim
+    write(out_unit,*) basis%tab_layer,'nb=    ',basis%nb
+    write(out_unit,*) basis%tab_layer,'nq=    ',basis%nq
+    write(out_unit,*) basis%tab_layer,'layer= ',basis%layer
+
+    write(out_unit,*) basis%tab_layer,'-------------------------------------'
   END SUBROUTINE Write_Basis_base
 END MODULE Basis_base_m

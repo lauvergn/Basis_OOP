@@ -27,31 +27,65 @@
 !===============================================================================
 !===============================================================================
 MODULE Basis_m
-  USE BasisInput_m
   USE Basis_base_m
   USE Basis_HO_m
   USE Basis_DP_m
   IMPLICIT NONE
 
 
-  CONTAINS
-  SUBROUTINE Read_Basis(basis)
+  PUBLIC
+  PRIVATE :: make_tab_layer
+
+CONTAINS
+  RECURSIVE SUBROUTINE Read_Basis(basis,layer)
+    USE BasisInput_m
     USE QDUtil_m
 
-    TYPE (Basis_t), intent(inout) :: basis
+    CLASS (Basis_t), intent(inout), allocatable :: basis
+    integer,         intent(in)                 :: layer
 
     TYPE (BasisInput_t) :: BasisIn
+    integer :: ib
+
+    CALL BasisIn%Read()
+    !CALL BasisIn%Write()
 
     SELECT CASE (BasisIn%name)
     CASE ('ho')
       ! its means only one primitive basis
+      allocate(Basis_HO_t :: basis)
       basis = init_Basis_HO(nb=BasisIn%nb,nq=BasisIn%nq,Q0=BasisIn%Q0,ScQ=BasisIn%ScQ)
     CASE ('dp')
+      allocate(Basis_DP_t :: basis)
       basis = init_Basis_DP(nb_basis=BasisIn%nb_basis)
     CASE default
       STOP 'no default'
     END SELECT
+    basis%layer     = layer + 1
+    basis%tab_layer = make_tab_layer(layer)
+    CALL BasisIn%dealloc()
+
+    SELECT TYPE (basis)
+    CLASS IS(Basis_DP_t)
+      DO ib=1,BasisIn%nb_basis
+        CALL Read_Basis(basis%tab_Pbasis(ib)%PBasis,basis%layer)
+      END DO
+    END SELECT
 
   END SUBROUTINE Read_Basis
 
+  FUNCTION make_tab_layer(layer) RESULT(tab_layer)
+  USE QDUtil_m
+  character (len=:), allocatable :: tab_layer
+
+  integer,         intent(in)                 :: layer
+
+  integer :: i
+
+  tab_layer = ''
+  DO i=1,layer*4
+    tab_layer = tab_layer // ' '
+  END DO
+
+END FUNCTION make_tab_layer
 END MODULE Basis_m

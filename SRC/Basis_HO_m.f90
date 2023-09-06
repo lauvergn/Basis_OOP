@@ -48,9 +48,7 @@ MODULE Basis_HO_m
     integer,           intent(in) :: nb,nq
     real (kind=Rkind), intent(in) :: Q0,ScQ
 
-    TYPE (Basis_HO_t), allocatable :: basis
-
-    allocate(Basis_HO_t :: basis)
+    TYPE (Basis_HO_t) :: basis
 
     basis%basis_t = Init_Basis(nb=nb,nq=nq,ndim=1,name='HO')
 
@@ -63,10 +61,11 @@ MODULE Basis_HO_m
 
     CLASS (Basis_HO_t), intent(in) :: basis
 
-    write(out_unit,*) '-------------------------------------'
+    write(out_unit,*) basis%tab_layer,'-------------------------------------'
     CALL basis%Basis_t%write()
-    write(out_unit,*) 'Q0= ',basis%Q0
-    write(out_unit,*) 'ScQ=',basis%ScQ
-    write(out_unit,*) '-------------------------------------'
+    write(out_unit,*) basis%tab_layer,'Q0= ',basis%Q0
+    write(out_unit,*) basis%tab_layer,'ScQ=',basis%ScQ
+    write(out_unit,*) basis%tab_layer,'-------------------------------------'
+
   END SUBROUTINE Write_Basis_HO
 END MODULE Basis_HO_m

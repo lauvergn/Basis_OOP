@@ -27,7 +27,6 @@
 !===============================================================================
 !===============================================================================
 MODULE Basis_DP_m
-  USE BasisInput_m
   USE Basis_base_m
   USE Basis_HO_m
   IMPLICIT NONE
@@ -46,46 +45,18 @@ MODULE Basis_DP_m
   PUBLIC :: Basis_DP_t,init_Basis_DP
 
   CONTAINS
-  FUNCTION init_Basis_DP(nb_basis) RESULT (basis)
+  RECURSIVE FUNCTION init_Basis_DP(nb_basis) RESULT (basis)
     USE QDUtil_m
+
     TYPE (Basis_DP_t)   :: basis
     integer, intent(in) :: nb_basis
-
-
-    TYPE (BasisInput_t) :: BasisIn
 
     integer :: i,nb,nq,ndim
 
     basis%name = 'DP'
-    nb   = 1
-    nq   = 1
-    ndim = 0
+
     IF (nb_basis < 1) STOP ' ERROR in init_Basis_DP: nb_basis < 1'
     allocate(basis%tab_Pbasis(nb_basis))
-
-    DO i=1,nb_basis
-      CALL BasisIn%Read()
-      !CALL BasisIn%Write()
-
-      SELECT CASE (BasisIn%name)
-      CASE ('ho')
-        ! its means only one primitive basis
-        basis%tab_Pbasis(i)%Pbasis = init_Basis_HO(nb=BasisIn%nb,nq=BasisIn%nq,Q0=BasisIn%Q0,ScQ=BasisIn%ScQ)
-      CASE ('dp')
-        basis%tab_Pbasis(i)%Pbasis = init_Basis_DP(nb_basis=BasisIn%nb_basis)
-      CASE default
-        STOP 'no default'
-      END SELECT
-
-      CALL BasisIn%dealloc()
-
-      nb   = nb   * basis%tab_Pbasis(i)%Pbasis%nb
-      nq   = nq   * basis%tab_Pbasis(i)%Pbasis%nq
-      ndim = ndim + basis%tab_Pbasis(i)%Pbasis%ndim
-    END DO
-    basis%nb   = nb
-    basis%nq   = nq
-    basis%ndim = ndim
 
   END FUNCTION init_Basis_DP
 
@@ -94,18 +65,27 @@ MODULE Basis_DP_m
 
     CLASS (Basis_DP_t), intent(in) :: basis
 
-    integer :: i
+    integer :: ib
 
-    write(out_unit,*) '-------------------------------------'
+    write(out_unit,*) basis%tab_layer,'-------------------------------------'
     CALL basis%Basis_t%write()
-    write(out_unit,*) 'DP: nb_basis',size(basis%tab_Pbasis)
+    write(out_unit,*) basis%tab_layer,'DP: nb_basis',size(basis%tab_Pbasis)
+
     IF (allocated(basis%tab_Pbasis)) THEN
-      DO i=1,size(basis%tab_Pbasis)
-        IF (allocated(basis%tab_Pbasis(i)%Pbasis)) THEN
-          CALL basis%tab_Pbasis(i)%Pbasis%write()
+
+      DO ib=1,size(basis%tab_Pbasis)
+        write(out_unit,*) basis%tab_layer,'ib: ',ib
+
+        IF (allocated(basis%tab_Pbasis(ib)%Pbasis)) THEN
+          CALL basis%tab_Pbasis(ib)%Pbasis%write()
+        ELSE
+          write(out_unit,*) basis%tab_layer,'DP: Pbasis is not allocated'
         END IF
       END DO
+    ELSE
+      write(out_unit,*) basis%tab_layer,'DP: tab_Pbasis is not allocated'
     END IF
-    write(out_unit,*) '-------------------------------------'
+
+    write(out_unit,*) basis%tab_layer,'-------------------------------------'
   END SUBROUTINE Write_Basis_DP
 END MODULE Basis_DP_m
