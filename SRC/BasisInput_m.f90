@@ -40,6 +40,9 @@ MODULE BasisInput_m
 
     integer                        :: LB = -1
     integer                        :: LG = -1
+
+    integer                        :: LB_in = -1
+    integer                        :: LG_in = -1
   CONTAINS
     PROCEDURE :: Read    => Read_BasisInput
     PROCEDURE :: Write   => Write_BasisInput
@@ -49,10 +52,12 @@ MODULE BasisInput_m
   PUBLIC :: BasisInput_t
 
   CONTAINS
-  SUBROUTINE Read_BasisInput(BasisInput)
+  SUBROUTINE Read_BasisInput(BasisInput,LB_in,LG_in)
     USE QDUtil_m
 
-    CLASS (BasisInput_t), intent(inout) :: BasisInput
+    CLASS (BasisInput_t), intent(inout)        :: BasisInput
+    integer,              intent(in), optional :: LB_in,LG_in
+
 
     integer            :: nb,nq,nb_basis,LB,LG
     character (len=50) :: name
@@ -72,14 +77,29 @@ MODULE BasisInput_m
     read(*,basis)
     !write(*,basis)
 
-    BasisInput%nb       = nb
-    BasisInput%nq       = nq
     BasisInput%nb_basis = nb_basis
     BasisInput%name     = TO_lowercase(trim(adjustl(name)))
     BasisInput%Q0       = Q0
     BasisInput%ScQ      = ScQ
-    BasisInput%LB       = LB
-    BasisInput%LG       = LG
+
+    BasisInput%LB_in    = -1
+    BasisInput%LG_in    = -1
+
+    IF (present(LB_in) .OR. present(LG_in)) THEN
+      BasisInput%nb       = 0
+      BasisInput%nq       = 0
+      BasisInput%LB       = -1
+      BasisInput%LG       = -1
+      IF (present(LB_in)) BasisInput%LB       = LB
+      IF (present(LG_in)) BasisInput%LG       = LG
+    ELSE
+      BasisInput%nb       = nb
+      BasisInput%nq       = nq
+      BasisInput%LB       = LB
+      BasisInput%LG       = LG
+    END IF
+
+ 
   END SUBROUTINE Read_BasisInput
   SUBROUTINE Write_BasisInput(BasisInput)
     USE QDUtil_m
@@ -94,12 +114,16 @@ MODULE BasisInput_m
     ELSE
       write(out_unit,*) 'name: not initialized!'
     END IF
-    write(out_unit,*) 'nb =',BasisInput%nb
-    write(out_unit,*) 'nq =',BasisInput%nq
-    write(out_unit,*) 'Q0 =',BasisInput%Q0
-    write(out_unit,*) 'ScQ=',BasisInput%ScQ
-    write(out_unit,*) 'LB =',BasisInput%LB
-    write(out_unit,*) 'LG =',BasisInput%LG
+    write(out_unit,*) 'nb    =',BasisInput%nb
+    write(out_unit,*) 'nq    =',BasisInput%nq
+
+    write(out_unit,*) 'Q0    =',BasisInput%Q0
+    write(out_unit,*) 'ScQ   =',BasisInput%ScQ
+
+    write(out_unit,*) 'LB    =',BasisInput%LB
+    write(out_unit,*) 'LG    =',BasisInput%LG
+    write(out_unit,*) 'LB_in =',BasisInput%LB_in
+    write(out_unit,*) 'LG_in =',BasisInput%LG_in
     write(out_unit,*) '-------------------------------------'
     write(out_unit,*) '--- END BasisInput ------------------'
     write(out_unit,*) '-------------------------------------'

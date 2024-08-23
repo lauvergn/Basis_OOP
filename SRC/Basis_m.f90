@@ -73,7 +73,11 @@ CONTAINS
     CALL BasisIn%dealloc()
 
     SELECT TYPE (basis)
-    CLASS IS(Basis_DP_t)
+    TYPE IS(Basis_DP_t)
+      DO ib=1,BasisIn%nb_basis
+        CALL Read_Basis(basis%tab_Pbasis(ib)%PBasis,basis%layer)
+      END DO
+      TYPE IS(Basis_SBG_t)
       DO ib=1,BasisIn%nb_basis
         CALL Read_Basis(basis%tab_Pbasis(ib)%PBasis,basis%layer)
       END DO
