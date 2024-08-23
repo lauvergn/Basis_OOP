@@ -50,19 +50,16 @@ MODULE Basis_base_m
   !end interface assignment (=)
 
   CONTAINS
-  FUNCTION Init_Basis(nb,nq,ndim,name) RESULT(basis)
-    USE QDUtil_m, ONLY : Rkind
-    TYPE (Basis_t) :: basis
+  FUNCTION Init_Basis(basisIn) RESULT(basis)
+    USE QDUtil_m
+    USE BasisInput_m
+    TYPE (Basis_t)                  :: basis
+    TYPE (BasisInput_t), intent(in) :: basisIn
 
-    integer,           intent(in) :: nb
-    integer,           intent(in) :: nq
-    integer,           intent(in) :: ndim
-    character (len=*), intent(in) :: name
-  
-    basis%nb   = nb
-    basis%nq   = nq
-    basis%ndim = ndim
-    basis%name = name
+    basis%nb   = basisIn%nb
+    basis%nq   = basisIn%nq
+    basis%ndim = 0
+    basis%name = basisIn%name
 
   END FUNCTION init_Basis
   SUBROUTINE basis2_TO_basis1(basis1,basis2)

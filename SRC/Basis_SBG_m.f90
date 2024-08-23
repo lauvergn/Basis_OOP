@@ -42,19 +42,19 @@ MODULE Basis_SBG_m
   PUBLIC :: Basis_SBG_t,init_Basis_SBG
 
   CONTAINS
-  FUNCTION init_Basis_SBG(nb_basis) RESULT (basis)
+  FUNCTION init_Basis_SBG(basisIn) RESULT (basis)
     USE QDUtil_m
-    TYPE (Basis_SBG_t)   :: basis
-    integer, intent(in) :: nb_basis
+    USE BasisInput_m
 
+    TYPE (Basis_SBG_t)              :: basis
+    TYPE (BasisInput_t), intent(in) :: basisIn
 
-    integer :: i,nb,nq,ndim
 
     !write(out_unit,*) 'Beginning init_Basis_SBG'
 
     basis%name = 'SBG'
-    IF (nb_basis < 1) STOP ' ERROR in init_Basis_SBG: nb_basis < 1'
-    allocate(basis%tab_Pbasis(nb_basis))
+    IF (basisIn%nb_basis < 1) STOP ' ERROR in init_Basis_SBG: nb_basis < 1'
+    allocate(basis%tab_Pbasis(basisIn%nb_basis))
 
   END FUNCTION init_Basis_SBG
 

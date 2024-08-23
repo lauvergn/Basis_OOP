@@ -45,20 +45,19 @@ MODULE Basis_DP_m
   PUBLIC :: Pbasis_t,Basis_DP_t,init_Basis_DP
 
   CONTAINS
-  RECURSIVE FUNCTION init_Basis_DP(nb_basis) RESULT (basis)
+  RECURSIVE FUNCTION init_Basis_DP(basisIn) RESULT (basis)
     USE QDUtil_m
+    USE BasisInput_m
 
-    TYPE (Basis_DP_t)   :: basis
-    integer, intent(in) :: nb_basis
-
-    integer :: i,nb,nq,ndim
+    TYPE (Basis_DP_t)               :: basis
+    TYPE (BasisInput_t), intent(in) :: basisIn
 
     !write(out_unit,*) 'Beginning init_Basis_DP'
 
     basis%name = 'DP'
 
-    IF (nb_basis < 1) STOP ' ERROR in init_Basis_DP: nb_basis < 1'
-    allocate(basis%tab_Pbasis(nb_basis))
+    IF (basisIn%nb_basis < 1) STOP ' ERROR in init_Basis_DP: nb_basis < 1'
+    allocate(basis%tab_Pbasis(basisIn%nb_basis))
 
   END FUNCTION init_Basis_DP
 

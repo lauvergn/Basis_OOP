@@ -42,20 +42,20 @@ MODULE Basis_HO_m
   PUBLIC :: Basis_HO_t,init_Basis_HO
 
   CONTAINS
-  FUNCTION init_Basis_HO(nb,nq,Q0,ScQ) RESULT(basis)
+  FUNCTION init_Basis_HO(basisIn) RESULT(basis)
     USE QDUtil_m
+    USE BasisInput_m
 
-    integer,           intent(in) :: nb,nq
-    real (kind=Rkind), intent(in) :: Q0,ScQ
-
-    TYPE (Basis_HO_t) :: basis
+    TYPE (Basis_HO_t)               :: basis
+    TYPE (BasisInput_t), intent(in) :: basisIn
 
     !write(out_unit,*) 'Beginning init_Basis_HO'
 
-    basis%basis_t = Init_Basis(nb=nb,nq=nq,ndim=1,name='HO')
+    basis%basis_t = Init_Basis(basisIn)
 
-    basis%Q0   = Q0
-    basis%ScQ  = ScQ
+    basis%ndim    = 1
+    basis%Q0      = basisIn%Q0
+    basis%ScQ     = basisIn%ScQ
 
   END FUNCTION init_Basis_HO
   SUBROUTINE Write_Basis_HO(basis)
