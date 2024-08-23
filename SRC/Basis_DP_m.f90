@@ -45,7 +45,7 @@ MODULE Basis_DP_m
   PUBLIC :: Pbasis_t,Basis_DP_t,init_Basis_DP
 
   CONTAINS
-  RECURSIVE FUNCTION init_Basis_DP(basisIn) RESULT (basis)
+  FUNCTION init_Basis_DP(basisIn) RESULT (basis)
     USE QDUtil_m
     USE BasisInput_m
 
@@ -61,7 +61,7 @@ MODULE Basis_DP_m
 
   END FUNCTION init_Basis_DP
 
-  SUBROUTINE Write_Basis_DP(basis)
+  RECURSIVE SUBROUTINE Write_Basis_DP(basis)
     USE QDUtil_m
 
     CLASS (Basis_DP_t), intent(in) :: basis

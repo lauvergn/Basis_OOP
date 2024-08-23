@@ -58,7 +58,7 @@ MODULE Basis_SBG_m
 
   END FUNCTION init_Basis_SBG
 
-  SUBROUTINE Write_Basis_SBG(basis)
+  RECURSIVE SUBROUTINE Write_Basis_SBG(basis)
     USE QDUtil_m
 
     CLASS (Basis_SBG_t), intent(in) :: basis
