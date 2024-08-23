@@ -1,32 +1,17 @@
-name = "AD_dnSVM"
+name = "Basis_OOP"
 version = "0.0.0"
 license = "MIT"
 author = "David Lauvergnat"
 maintainer = "david.lauvergnat@universite-paris-saclay.fr"
-copyright = "2021 David Lauvergnat"
+copyright = "2024 David Lauvergnat"
 
 [library]
 source-dir="SRC"
 
-[[ test ]]
-name="dnS"
-source-dir="Tests"
-main="TEST_dnS.f90"
-
-[[ test ]]
-name="dnPoly"
-source-dir="Tests"
-main="TEST_dnPoly.f90"
-
-[[ test ]]
-name="dnVec"
-source-dir="Tests"
-main="TEST_dnVec.f90"
-
-[[ executable ]]
-name="Exa_dnS"
+[[executable]]
+name="Exe"
 source-dir="APP"
-main="Example_dnS.f90"
+main="Exa_QDBa.f90"
 
 
 [build]
@@ -34,7 +19,3 @@ link = ["blas", "lapack"]
 
 [dependencies]
 QDUtilLib = { git = "https://github.com/lauvergn/QDUtilLib" }
-
-
-[preprocess]
-cpp.macros = ["__LAPACK=1"]

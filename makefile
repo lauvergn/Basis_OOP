@@ -216,7 +216,7 @@ clean:
 	@cd Tests && ./clean
 	@echo "  done cleaning"
 cleanall: clean
-	rm -f *.a
+	rm -f *.a res* Test_QDBa.x
 	rm -rf OBJ
 	cd $(MAIN_path)/Ext_Lib ; ./cleanlib
 	@echo "  done remove *.a libraries and OBJ directory"
