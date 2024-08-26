@@ -1,1 +1,11 @@
-rm -rf QDUtilLib*
+#!/bin/bash
+
+for dirlib in *loc
+do
+  echo $dirlib
+  cd $dirlib
+  make --silent cleanall &> /dev/null
+  test -d Ext_lib && rm -r Ext_lib/Save*.zip
+  cd ..
+done
+
