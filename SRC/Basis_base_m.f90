@@ -36,6 +36,10 @@ MODULE Basis_base_m
     integer :: nb   = 0
     integer :: nq   = 0
     integer :: ndim = 0
+
+    real (kind=Rkind) :: Q0
+    real (kind=Rkind) :: ScQ
+
     character (len=:), allocatable :: name
 
     integer :: layer = -1
@@ -71,6 +75,8 @@ MODULE Basis_base_m
     PROCEDURE :: Get_GG         => Get_GG_Basis_base
 
     PROCEDURE :: CheckOrtho     => CheckOrtho_Basis_base
+    PROCEDURE :: Scale          => Scale_Basis_base
+
   END TYPE Basis_t
 
   PUBLIC :: Basis_t,Init_Basis
@@ -200,7 +206,7 @@ MODULE Basis_base_m
   FUNCTION Get_nb_Basis_base(this,l) RESULT(nb)
     integer :: nb
 
-    CLASS (Basis_t), intent(inout)        :: this
+    CLASS (Basis_t), intent(in)           :: this
     integer,         intent(in), optional :: l
 
     IF (allocated(this%tab_nb)) THEN
@@ -259,9 +265,9 @@ MODULE Basis_base_m
   FUNCTION Get_GB_Basis_base(this,ider,l) RESULT(gb)
     real(kind=Rkind), pointer :: gb(:,:)
 
-    CLASS (Basis_t), intent(inout), target   :: this
-    integer,         intent(in),    optional :: ider(2)
-    integer,         intent(in),    optional :: l
+    CLASS (Basis_t), intent(in), target   :: this
+    integer,         intent(in), optional :: ider(2)
+    integer,         intent(in), optional :: l
 
     integer :: l_loc
 
@@ -317,8 +323,8 @@ MODULE Basis_base_m
   FUNCTION Get_BGW_Basis_base(this,l) RESULT(bgw)
     real(kind=Rkind), pointer :: bgw(:,:)
 
-    CLASS (Basis_t), intent(inout), target   :: this
-    integer,         intent(in),    optional :: l
+    CLASS (Basis_t), intent(in), target   :: this
+    integer,         intent(in), optional :: l
 
     integer :: l_loc
 
@@ -359,9 +365,9 @@ MODULE Basis_base_m
   FUNCTION Get_BB_Basis_base(this,ider,l) RESULT(bb)
     real(kind=Rkind), pointer :: bb(:,:)
 
-    CLASS (Basis_t), intent(inout), target   :: this
-    integer,         intent(in),    optional :: ider(2)
-    integer,         intent(in),    optional :: l
+    CLASS (Basis_t), intent(in), target   :: this
+    integer,         intent(in), optional :: ider(2)
+    integer,         intent(in), optional :: l
 
     integer :: l_loc
 
@@ -414,9 +420,9 @@ MODULE Basis_base_m
   FUNCTION Get_GG_Basis_base(this,ider,l) RESULT(gg)
     real(kind=Rkind), pointer :: gg(:,:)
 
-    CLASS (Basis_t), intent(inout), target   :: this
-    integer,         intent(in),    optional :: ider(2)
-    integer,         intent(in),    optional :: l
+    CLASS (Basis_t), intent(in), target   :: this
+    integer,         intent(in), optional :: ider(2)
+    integer,         intent(in), optional :: l
 
     integer :: l_loc
 
@@ -446,7 +452,7 @@ MODULE Basis_base_m
     USE QDUtil_m, ONLY : Rkind, ONETENTH, out_unit, Write_Mat, TO_string, Identity_Mat
     USE ADdnSVM_m
 
-    CLASS (Basis_t), intent(inout) :: this
+    CLASS (Basis_t), intent(in) :: this
 
 
     real (kind=Rkind), allocatable :: SmId(:,:)
@@ -463,7 +469,7 @@ MODULE Basis_base_m
         max_err = maxval(abs(SmId))
         write(out_unit,*) 'At l=',TO_string(l),' Max error of S-Id',max_err
         IF (max_err > ONETENTH**6) THEN
-          write(out_unit,*) 'At l=',TO_string(l),'S:'
+          write(out_unit,*) 'At l=',TO_string(l),', S:'
           CALL Write_Mat(this%get_BB(l=l),nio=out_unit,nbcol=5)
         END IF
         flush(out_unit)
@@ -475,4 +481,36 @@ MODULE Basis_base_m
     END IF
 
   END SUBROUTINE CheckOrtho_Basis_base
+
+
+  SUBROUTINE Scale_Basis_base(this)
+    USE QDUtil_m, ONLY : ZERO, ONE, out_unit
+    USE ADdnSVM_m
+
+    CLASS (Basis_t), intent(inout) :: this
+
+    integer           :: l,LG
+
+    IF (this%ScQ == ONE .AND. this%Q0 == ZERO) RETURN
+
+    IF (allocated(this%GB) .AND. allocated(this%X) .AND. allocated(this%W)) THEN
+
+      LG = size(this%GB)-1
+
+      DO l=0,LG
+        this%X(l) = this%Q0 + this%X(l) * (ONE / this%ScQ)
+        this%W(l) =           this%W(l) / this%ScQ
+
+        this%GB(l)%d0 = this%GB(l)%d0 * sqrt(this%ScQ)
+        this%GB(l)%d1 = this%GB(l)%d1 * sqrt(this%ScQ)*this%ScQ
+        this%GB(l)%d2 = this%GB(l)%d2 * sqrt(this%ScQ)*this%ScQ**2
+
+      END DO
+    ELSE
+      write(out_unit,*) 'ERROR in Scale_Basis_base'
+      write(out_unit,*) 'GB or X or W are not allocated'
+      STOP 'ERROR in Scale_Basis_base: GB or X or W are not allocated'
+    END IF
+
+  END SUBROUTINE Scale_Basis_base
 END MODULE Basis_base_m

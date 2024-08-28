@@ -44,20 +44,23 @@ MODULE Basis_BoxAB_m
   PUBLIC :: Basis_BoxAB_t,init_Basis_BoxAB
 
   CONTAINS
-  FUNCTION init_Basis_BoxAB(basisIn) RESULT(basis)
+  FUNCTION init_Basis_BoxAB(basisIn) RESULT(this)
     USE QDUtil_m
     USE BasisInput_m
 
-    TYPE (Basis_BoxAB_t)            :: basis
+    TYPE (Basis_BoxAB_t)            :: this
     TYPE (BasisInput_t), intent(in) :: basisIn
 
     !write(out_unit,*) 'Beginning init_Basis_BoxAB'
 
-    basis%basis_t = Init_Basis(basisIn)
+    this%basis_t = Init_Basis(basisIn)
 
-    basis%ndim   = 1
-    basis%A      = basisIn%A
-    basis%B      = basisIn%B
+    this%ndim   = 1
+    this%A      = basisIn%A
+    this%B      = basisIn%B
+
+    this%Q0     = this%A
+    this%ScQ    = PI/(this%B-this%A)
 
   END FUNCTION init_Basis_BoxAB
   SUBROUTINE Write_Basis_BoxAB(basis)
@@ -102,7 +105,7 @@ MODULE Basis_BoxAB_m
   END SUBROUTINE Set_Grid_Basis_BoxAB
 
   SUBROUTINE Set_GB_Basis_BoxAB(this)
-    USE QDUtil_m, ONLY : Rkind, ZERO, HALF, out_unit
+    USE QDUtil_m, ONLY : Rkind, ZERO, HALF, PI, out_unit
     USE ADdnSVM_m
 
     CLASS (Basis_BoxAB_t), intent(inout) :: this
@@ -111,14 +114,10 @@ MODULE Basis_BoxAB_m
     TYPE (dnS_t)      :: dnx,dnB
     real (kind=Rkind) :: xiq
 
-
-
     IF (allocated(this%tab_nq) .AND. allocated(this%tab_nb)) THEN
 
       LG = size(this%tab_nq)-1
       allocate(this%GB(0:LG))
-
-      dnx = Variable(ZERO, nvar=1, nderiv=2)
 
       DO l=0,LG
         nql = this%get_nq(l)
@@ -128,7 +127,9 @@ MODULE Basis_BoxAB_m
 
         DO iq=1,nql
           xiq = this%X(l)%d0(1,iq)
-          CALL set_d0S(dnX,xiq)
+
+          dnx = Variable(xiq, nvar=1, nderiv=2)
+
           DO ib=1,nbl
             IF (ib == nbl .AND. nbl == nql) THEN
               dnB = dnBox(dnX, ib) * sqrt(HALF)
@@ -137,6 +138,7 @@ MODULE Basis_BoxAB_m
             END IF
             CALL dnS_TO_dnMat(dnB,this%GB(l),i=iq,j=ib)
           END DO
+
         END DO
       END DO
     ELSE

@@ -70,6 +70,7 @@ CONTAINS
       CALL basis%Set_tab_n_OF_l(BasisIn%LB_in,BasisIn%LG_in)
       CALL basis%Set_Grid()
       CALL basis%Set_GB()
+      CALL basis%Scale()
       CALL basis%Set_BGW()
       CALL basis%Set_BB()
       CALL basis%Set_GG()

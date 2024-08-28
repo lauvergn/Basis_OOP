@@ -33,8 +33,7 @@ MODULE Basis_HO_m
   PRIVATE
 
   TYPE, EXTENDS (Basis_t) :: Basis_HO_t
-    real (kind=Rkind) :: Q0
-    real (kind=Rkind) :: ScQ
+
   CONTAINS
     PROCEDURE :: Write  => Write_Basis_HO
   END TYPE Basis_HO_t
