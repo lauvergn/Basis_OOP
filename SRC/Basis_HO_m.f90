@@ -41,32 +41,32 @@ MODULE Basis_HO_m
   PUBLIC :: Basis_HO_t,init_Basis_HO
 
   CONTAINS
-  FUNCTION init_Basis_HO(basisIn) RESULT(basis)
+  FUNCTION init_Basis_HO(basisIn) RESULT(this)
     USE QDUtil_m
     USE BasisInput_m
 
-    TYPE (Basis_HO_t)               :: basis
+    TYPE (Basis_HO_t)               :: this
     TYPE (BasisInput_t), intent(in) :: basisIn
 
     !write(out_unit,*) 'Beginning init_Basis_HO'
 
-    basis%basis_t = Init_Basis(basisIn)
+    this%basis_t = Init_Basis(basisIn)
 
-    basis%ndim    = 1
-    basis%Q0      = basisIn%Q0
-    basis%ScQ     = basisIn%ScQ
+    this%ndim    = 1
+    this%Q0      = basisIn%Q0
+    this%ScQ     = basisIn%ScQ
 
   END FUNCTION init_Basis_HO
-  SUBROUTINE Write_Basis_HO(basis)
+  SUBROUTINE Write_Basis_HO(this)
     USE QDUtil_m, ONLY : Rkind, out_unit
 
-    CLASS (Basis_HO_t), intent(in) :: basis
+    CLASS (Basis_HO_t), intent(in) :: this
 
-    write(out_unit,*) basis%tab_layer,'-------------------------------------'
-    CALL basis%Basis_t%write()
-    write(out_unit,*) basis%tab_layer,'Q0= ',basis%Q0
-    write(out_unit,*) basis%tab_layer,'ScQ=',basis%ScQ
-    write(out_unit,*) basis%tab_layer,'-------------------------------------'
+    write(out_unit,*) this%tab_layer,'-------------------------------------'
+    CALL this%Basis_t%write()
+    write(out_unit,*) this%tab_layer,'Q0= ',this%Q0
+    write(out_unit,*) this%tab_layer,'ScQ=',this%ScQ
+    write(out_unit,*) this%tab_layer,'-------------------------------------'
 
   END SUBROUTINE Write_Basis_HO
 END MODULE Basis_HO_m

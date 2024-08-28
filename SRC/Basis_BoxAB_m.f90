@@ -63,16 +63,16 @@ MODULE Basis_BoxAB_m
     this%ScQ    = PI/(this%B-this%A)
 
   END FUNCTION init_Basis_BoxAB
-  SUBROUTINE Write_Basis_BoxAB(basis)
+  SUBROUTINE Write_Basis_BoxAB(this)
     USE QDUtil_m, ONLY : Rkind, out_unit
 
-    CLASS (Basis_BoxAB_t), intent(in) :: basis
+    CLASS (Basis_BoxAB_t), intent(in) :: this
 
-    write(out_unit,*) basis%tab_layer,'-------------------------------------'
-    CALL basis%Basis_t%write()
-    write(out_unit,*) basis%tab_layer,'A= ',basis%A
-    write(out_unit,*) basis%tab_layer,'B= ',basis%B
-    write(out_unit,*) basis%tab_layer,'-------------------------------------'
+    write(out_unit,*) this%tab_layer,'-------------------------------------'
+    CALL this%Basis_t%write()
+    write(out_unit,*) this%tab_layer,'A= ',this%A
+    write(out_unit,*) this%tab_layer,'B= ',this%B
+    write(out_unit,*) this%tab_layer,'-------------------------------------'
 
   END SUBROUTINE Write_Basis_BoxAB
 

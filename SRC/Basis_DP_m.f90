@@ -48,98 +48,98 @@ MODULE Basis_DP_m
   PUBLIC :: Pbasis_t,Basis_DP_t,init_Basis_DP
 
   CONTAINS
-  FUNCTION init_Basis_DP(basisIn) RESULT (basis)
+  FUNCTION init_Basis_DP(basisIn) RESULT (this)
     USE QDUtil_m
     USE BasisInput_m
 
-    TYPE (Basis_DP_t)               :: basis
+    TYPE (Basis_DP_t)               :: this
     TYPE (BasisInput_t), intent(in) :: basisIn
 
     !write(out_unit,*) 'Beginning init_Basis_DP'
 
-    basis%name = 'DP'
+    this%name = 'DP'
 
     IF (basisIn%nb_basis < 1) STOP ' ERROR in init_Basis_DP: nb_basis < 1'
-    allocate(basis%tab_Pbasis(basisIn%nb_basis))
+    allocate(this%tab_Pbasis(basisIn%nb_basis))
 
   END FUNCTION init_Basis_DP
 
-  RECURSIVE SUBROUTINE Write_Basis_DP(basis)
+  RECURSIVE SUBROUTINE Write_Basis_DP(this)
     USE QDUtil_m
 
-    CLASS (Basis_DP_t), intent(in) :: basis
+    CLASS (Basis_DP_t), intent(in) :: this
 
     integer :: ib
 
-    write(out_unit,*) basis%tab_layer,'-------------------------------------'
-    CALL basis%Basis_t%write()
-    write(out_unit,*) basis%tab_layer,'DP: nb_basis',size(basis%tab_Pbasis)
+    write(out_unit,*) this%tab_layer,'-------------------------------------'
+    CALL this%Basis_t%write()
+    write(out_unit,*) this%tab_layer,'DP: nb_basis',size(this%tab_Pbasis)
 
-    IF (allocated(basis%tab_Pbasis)) THEN
+    IF (allocated(this%tab_Pbasis)) THEN
 
-      DO ib=1,size(basis%tab_Pbasis)
-        write(out_unit,*) basis%tab_layer,'ib: ',ib
+      DO ib=1,size(this%tab_Pbasis)
+        write(out_unit,*) this%tab_layer,'ib: ',ib
 
-        IF (allocated(basis%tab_Pbasis(ib)%Pbasis)) THEN
-          CALL basis%tab_Pbasis(ib)%Pbasis%write()
+        IF (allocated(this%tab_Pbasis(ib)%Pbasis)) THEN
+          CALL this%tab_Pbasis(ib)%Pbasis%write()
         ELSE
-          write(out_unit,*) basis%tab_layer,'DP: Pbasis is not allocated'
+          write(out_unit,*) this%tab_layer,'DP: Pbasis is not allocated'
         END IF
       END DO
     ELSE
-      write(out_unit,*) basis%tab_layer,'DP: tab_Pbasis is not allocated'
+      write(out_unit,*) this%tab_layer,'DP: tab_Pbasis is not allocated'
     END IF
 
-    write(out_unit,*) basis%tab_layer,'-------------------------------------'
+    write(out_unit,*) this%tab_layer,'-------------------------------------'
   END SUBROUTINE Write_Basis_DP
 
-  SUBROUTINE Set_ndim_Basis_DP(basis)
+  SUBROUTINE Set_ndim_Basis_DP(this)
     USE QDUtil_m, ONLY : Rkind, out_unit
 
-    CLASS (Basis_DP_t), intent(inout) :: basis
+    CLASS (Basis_DP_t), intent(inout) :: this
 
     integer :: ib
 
-    basis%ndim = 0
-    DO ib=1,size(basis%tab_Pbasis)
-      basis%ndim = basis%ndim + basis%tab_Pbasis(ib)%Pbasis%ndim
+    this%ndim = 0
+    DO ib=1,size(this%tab_Pbasis)
+      this%ndim = this%ndim + this%tab_Pbasis(ib)%Pbasis%ndim
     END DO
 
   END SUBROUTINE Set_ndim_Basis_DP
 
-  SUBROUTINE Set_tab_n_OF_l_Basis_DP(basis,LB_in,LG_in)
+  SUBROUTINE Set_tab_n_OF_l_Basis_DP(this,LB_in,LG_in)
     USE QDUtil_m, ONLY : Rkind, out_unit
 
-    CLASS (Basis_DP_t), intent(inout) :: basis
+    CLASS (Basis_DP_t), intent(inout) :: this
     integer,            intent(in)    :: LB_in,LG_in
 
     integer :: ib,l
 
     IF (LB_in > -1 .AND. LG_in > -1) THEN
       STOP 'STOP in Set_tab_n_OF_l_Basis_DP: not yet with LB_in,LG_in'
-      allocate(basis%tab_nb(0:LB_in))
-      !basis%tab_nb(0:LB_in) = [((l+1),l=0,LB_in)]
+      allocate(this%tab_nb(0:LB_in))
+      !this%tab_nb(0:LB_in) = [((l+1),l=0,LB_in)]
 
-      allocate(basis%tab_nq(0:LG_in))
-      !basis%tab_nq(0:LG_in) = [((l+1),l=0,LG_in)]
+      allocate(this%tab_nq(0:LG_in))
+      !this%tab_nq(0:LG_in) = [((l+1),l=0,LG_in)]
     ELSE
-      allocate(basis%tab_nb(0:0))
-      allocate(basis%tab_nq(0:0))
+      allocate(this%tab_nb(0:0))
+      allocate(this%tab_nq(0:0))
 
-      basis%tab_nb(0) = 1
-      basis%tab_nq(0) = 1
+      this%tab_nb(0) = 1
+      this%tab_nq(0) = 1
 
-      DO ib=1,size(basis%tab_Pbasis)
-        basis%tab_nb(0) =  basis%tab_nb(0) * basis%tab_Pbasis(ib)%Pbasis%nb
-        basis%tab_nq(0) =  basis%tab_nq(0) * basis%tab_Pbasis(ib)%Pbasis%nq
+      DO ib=1,size(this%tab_Pbasis)
+        this%tab_nb(0) =  this%tab_nb(0) * this%tab_Pbasis(ib)%Pbasis%nb
+        this%tab_nq(0) =  this%tab_nq(0) * this%tab_Pbasis(ib)%Pbasis%nq
       END DO
 
-      basis%nb = basis%tab_nb(0)
-      basis%nq = basis%tab_nq(0)
+      this%nb = this%tab_nb(0)
+      this%nq = this%tab_nq(0)
 
     END IF
 
-    !write(*,*) 'basis%tab_nb',basis%tab_nb
-    !write(*,*) 'basis%tab_nq',basis%tab_nq
+    !write(*,*) 'this%tab_nb',this%tab_nb
+    !write(*,*) 'this%tab_nq',this%tab_nq
   END SUBROUTINE Set_tab_n_OF_l_Basis_DP
 END MODULE Basis_DP_m

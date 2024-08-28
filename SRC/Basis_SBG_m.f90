@@ -41,43 +41,43 @@ MODULE Basis_SBG_m
 
   PUBLIC :: Basis_SBG_t,init_Basis_SBG
 
-  CONTAINS
-  FUNCTION init_Basis_SBG(basisIn) RESULT (basis)
+CONTAINS
+  FUNCTION init_Basis_SBG(basisIn) RESULT (this)
     USE QDUtil_m
     USE BasisInput_m
 
-    TYPE (Basis_SBG_t)              :: basis
+    TYPE (Basis_SBG_t)              :: this
     TYPE (BasisInput_t), intent(in) :: basisIn
 
 
     !write(out_unit,*) 'Beginning init_Basis_SBG'
 
-    basis%name = 'SBG'
+    this%name = 'SBG'
     IF (basisIn%nb_basis < 1) STOP ' ERROR in init_Basis_SBG: nb_basis < 1'
-    allocate(basis%tab_Pbasis(basisIn%nb_basis))
+    allocate(this%tab_Pbasis(basisIn%nb_basis))
 
   END FUNCTION init_Basis_SBG
 
-  RECURSIVE SUBROUTINE Write_Basis_SBG(basis)
+  RECURSIVE SUBROUTINE Write_Basis_SBG(this)
     USE QDUtil_m
 
-    CLASS (Basis_SBG_t), intent(in) :: basis
+    CLASS (Basis_SBG_t), intent(in) :: this
 
-    write(out_unit,*) basis%tab_layer,'---- SBG ----------------------------'
-    CALL basis%Basis_DP_t%write()
+    write(out_unit,*) this%tab_layer,'---- SBG ----------------------------'
+    CALL this%Basis_DP_t%write()
 
-    write(out_unit,*) basis%tab_layer,'SBG: nb_basis',size(basis%tab_Pbasis)
-    write(out_unit,*) basis%tab_layer,'LB=',basis%LB
-    write(out_unit,*) basis%tab_layer,'LG=',basis%LG
-    write(out_unit,*) basis%tab_layer,'---- END SBG -------------------------'
+    write(out_unit,*) this%tab_layer,'SBG: nb_basis',size(this%tab_Pbasis)
+    write(out_unit,*) this%tab_layer,'LB=',this%LB
+    write(out_unit,*) this%tab_layer,'LG=',this%LG
+    write(out_unit,*) this%tab_layer,'---- END SBG -------------------------'
 
   END SUBROUTINE Write_Basis_SBG
 
-  SUBROUTINE Set_tab_n_OF_l_Basis_SBG(basis,LB_in,LG_in)
+  SUBROUTINE Set_tab_n_OF_l_Basis_SBG(this,LB_in,LG_in)
     USE QDUtil_m, ONLY : Rkind, out_unit
 
-    CLASS (Basis_SBG_t), intent(inout) :: basis
-    integer,            intent(in)    :: LB_in,LG_in
+    CLASS (Basis_SBG_t), intent(inout) :: this
+    integer,            intent(in)     :: LB_in,LG_in
 
     integer :: ib,l
 
@@ -86,21 +86,21 @@ MODULE Basis_SBG_m
 
     ELSE
       STOP 'STOP in Set_tab_n_OF_l_Basis_SBG: not yet' 
-      allocate(basis%tab_nb(0:basis%LB))
-      allocate(basis%tab_nq(0:basis%LG))
+      allocate(this%tab_nb(0:this%LB))
+      allocate(this%tab_nq(0:this%LG))
 
-      basis%tab_nb(0) = 1
-      basis%tab_nq(0) = 1
+      this%tab_nb(0) = 1
+      this%tab_nq(0) = 1
 
-      DO ib=1,size(basis%tab_Pbasis)
+      DO ib=1,size(this%tab_Pbasis)
 
-        basis%tab_nb(0) =  basis%tab_nb(0) * basis%tab_Pbasis(ib)%Pbasis%nb
-        basis%tab_nq(0) =  basis%tab_nq(0) * basis%tab_Pbasis(ib)%Pbasis%nq
+        this%tab_nb(0) =  this%tab_nb(0) * this%tab_Pbasis(ib)%Pbasis%nb
+        this%tab_nq(0) =  this%tab_nq(0) * this%tab_Pbasis(ib)%Pbasis%nq
       END DO
 
     END IF
 
-    !write(*,*) 'basis%tab_nb',basis%tab_nb
-    !write(*,*) 'basis%tab_nq',basis%tab_nq
+    !write(*,*) 'this%tab_nb',basis%tab_nb
+    !write(*,*) 'this%tab_nq',basis%tab_nq
   END SUBROUTINE Set_tab_n_OF_l_Basis_SBG
 END MODULE Basis_SBG_m
