@@ -71,6 +71,8 @@ CONTAINS
       CALL basis%Set_Grid()
       CALL basis%Set_GB()
       CALL basis%Set_BGW()
+      CALL basis%Set_BB()
+      CALL basis%Set_GG()
       CALL basis%CheckOrtho()
     CASE ('dp')
       !write(out_unit,*) 'DP basis'

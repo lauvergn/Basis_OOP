@@ -88,8 +88,8 @@ MODULE Basis_BoxAB_m
       allocate(this%W(0:LG))
 
       DO l=0,LG
-        dx  = PI/this%tab_nq(l)
-        nql = this%tab_nq(l)
+        nql = this%get_nq(l)
+        dx  = PI/nql
         this%X(l) = reshape([(dx*(-HALF+i),i=1,nql)],shape=[1,nql])
         this%W(l) = [(dx,i=1,nql)]
       END DO
@@ -102,7 +102,7 @@ MODULE Basis_BoxAB_m
   END SUBROUTINE Set_Grid_Basis_BoxAB
 
   SUBROUTINE Set_GB_Basis_BoxAB(this)
-    USE QDUtil_m, ONLY : Rkind, ZERO, out_unit
+    USE QDUtil_m, ONLY : Rkind, ZERO, HALF, out_unit
     USE ADdnSVM_m
 
     CLASS (Basis_BoxAB_t), intent(inout) :: this
@@ -121,8 +121,8 @@ MODULE Basis_BoxAB_m
       dnx = Variable(ZERO, nvar=1, nderiv=2)
 
       DO l=0,LG
-        nql = this%tab_nq(l)
-        nbl = this%tab_nb(l)
+        nql = this%get_nq(l)
+        nbl = this%get_nb(l)
 
         CALL alloc_dnMat(this%GB(l),sizeL=nql, sizeC=nbl, nVar=1, nderiv=2)
 
@@ -130,7 +130,11 @@ MODULE Basis_BoxAB_m
           xiq = this%X(l)%d0(1,iq)
           CALL set_d0S(dnX,xiq)
           DO ib=1,nbl
-            dnB = dnBox(dnX, ib)
+            IF (ib == nbl .AND. nbl == nql) THEN
+              dnB = dnBox(dnX, ib) * sqrt(HALF)
+            ELSE
+              dnB = dnBox(dnX, ib)
+            END IF
             CALL dnS_TO_dnMat(dnB,this%GB(l),i=iq,j=ib)
           END DO
         END DO
