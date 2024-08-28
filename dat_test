@@ -3,5 +3,7 @@
     &basis nb_basis=2 name='SBG' LB=4 LG=5 /
       &basis name='HO' Q0=-1. ScQ=2. /
       &basis name='HO' Q0=1. ScQ=2. /
-    &basis nb=6 nq=5 name='HO' Q0=0. ScQ=3. /
+    &basis nb_basis=2 name='DP' /
+      &basis nb=4 nq=5 name='BoxAB' Q0=0. ScQ=3. /
+      &basis nb=7 nq=8 name='BoxAB' Q0=-1. ScQ=1. /
 

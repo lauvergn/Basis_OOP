@@ -35,8 +35,12 @@ MODULE BasisInput_m
     integer                        :: nq = 0
     integer                        :: nb_basis = 0
     character (len=:), allocatable :: name
+
     real (kind=Rkind)              :: Q0  = ZERO
     real (kind=Rkind)              :: ScQ = ONE
+
+    real (kind=Rkind)              :: A = ZERO
+    real (kind=Rkind)              :: B = ONE
 
     integer                        :: LB = -1
     integer                        :: LG = -1
@@ -62,25 +66,33 @@ MODULE BasisInput_m
     integer            :: nb,nq,nb_basis,LB,LG
     character (len=50) :: name
     real (kind=Rkind)  :: Q0,ScQ
+    real (kind=Rkind)  :: A,B
 
-    namelist / basis / nb,nq,name,Q0,ScQ,nb_basis,LB,LG
+    namelist / basis / nb,nq,name,Q0,ScQ,A,B,nb_basis,LB,LG
 
     nb       = 0
     nq       = 0
+    LB       = -1
+    LG       = -1
+
     nb_basis = 0
+
     name     = '0'
     Q0       = ZERO
     ScQ      = ONE
-    LB       = -1
-    LG       = -1
+    A        = ZERO
+    B        = ONE
 
     read(*,basis)
     !write(*,basis)
 
     BasisInput%nb_basis = nb_basis
+
     BasisInput%name     = TO_lowercase(trim(adjustl(name)))
     BasisInput%Q0       = Q0
     BasisInput%ScQ      = ScQ
+    BasisInput%A        = A
+    BasisInput%B        = B
 
     BasisInput%LB_in    = -1
     BasisInput%LG_in    = -1
@@ -90,16 +102,24 @@ MODULE BasisInput_m
       BasisInput%nq       = 0
       BasisInput%LB       = -1
       BasisInput%LG       = -1
-      IF (present(LB_in)) BasisInput%LB       = LB
-      IF (present(LG_in)) BasisInput%LG       = LG
+      IF (present(LB_in)) THEN 
+        BasisInput%LB       = LB
+      ELSE
+        BasisInput%LB       = LG
+      END IF
+      IF (present(LG_in)) THEN 
+        BasisInput%LG       = LG
+      ELSE
+        BasisInput%LG       = LB
+      END IF
     ELSE
       BasisInput%nb       = nb
+      IF (nq < 1) nq = nb
       BasisInput%nq       = nq
       BasisInput%LB       = LB
       BasisInput%LG       = LG
     END IF
 
- 
   END SUBROUTINE Read_BasisInput
   SUBROUTINE Write_BasisInput(BasisInput)
     USE QDUtil_m
@@ -119,6 +139,9 @@ MODULE BasisInput_m
 
     write(out_unit,*) 'Q0    =',BasisInput%Q0
     write(out_unit,*) 'ScQ   =',BasisInput%ScQ
+
+    write(out_unit,*) 'A     =',BasisInput%A
+    write(out_unit,*) 'B     =',BasisInput%B
 
     write(out_unit,*) 'LB    =',BasisInput%LB
     write(out_unit,*) 'LG    =',BasisInput%LG

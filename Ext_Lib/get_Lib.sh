@@ -1,16 +1,28 @@
 #!/bin/bash
 
 #EXTLIB_TYPE=$1
-#BaseName=QDUtilLib
 BaseName=$1
-
-
-ExtLibSAVEDIR=/Users/lauvergn/git/Ext_Lib
+DIR=$2
 
 echo In get_Lib.sh $BaseName
 
 
+ExtLibSAVEDIR=/Users/lauvergn/git/Ext_Lib
 LOC_version=$BaseName
+
+
+if (! test -z "$DIR" ) then
+if (test -d "$DIR" ) then
+  rm -f $LOC_version
+  echo $DIR directory exist. Adding the link.
+  ln -s $DIR $LOC_version
+  if (test -e $LOC_version) then
+    echo End get_Lib.sh $BaseName
+    exit 0
+  fi
+fi
+fi
+
 
 if (test -d $LOC_version) then
   echo $LOC_version directory exist
@@ -20,7 +32,10 @@ else
   if (test -d $LOC_version"_loc") then
     echo $LOC_version"_loc" directory exist. Adding the link.
     ln -s $LOC_version"_loc" $LOC_version
-    test -e $LOC_version && ( echo End get_Lib.sh $BaseName; exit 0 )
+    if (test -e $LOC_version) then
+      echo End get_Lib.sh $BaseName
+      exit 0
+    fi
   fi
 fi
 

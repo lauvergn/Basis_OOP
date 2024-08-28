@@ -34,9 +34,9 @@ MODULE Basis_SBG_m
   TYPE, EXTENDS (Basis_DP_t) :: Basis_SBG_t
     integer :: LB = -1
     integer :: LG = -1
-    TYPE (Pbasis_t), allocatable :: tab_SBG_Pbasis(:,:)
   CONTAINS
-    PROCEDURE :: Write => Write_Basis_SBG
+    PROCEDURE :: Write          => Write_Basis_SBG
+    PROCEDURE :: Set_tab_n_OF_l => Set_tab_n_OF_l_Basis_SBG
   END TYPE Basis_SBG_t
 
   PUBLIC :: Basis_SBG_t,init_Basis_SBG
@@ -72,4 +72,35 @@ MODULE Basis_SBG_m
     write(out_unit,*) basis%tab_layer,'---- END SBG -------------------------'
 
   END SUBROUTINE Write_Basis_SBG
+
+  SUBROUTINE Set_tab_n_OF_l_Basis_SBG(basis,LB_in,LG_in)
+    USE QDUtil_m, ONLY : Rkind, out_unit
+
+    CLASS (Basis_SBG_t), intent(inout) :: basis
+    integer,            intent(in)    :: LB_in,LG_in
+
+    integer :: ib,l
+
+    IF (LB_in > -1 .AND. LG_in > -1) THEN
+      STOP 'STOP in Set_tab_n_OF_l_Basis_SBG: not yet with LB_in,LG_in'
+
+    ELSE
+      STOP 'STOP in Set_tab_n_OF_l_Basis_SBG: not yet' 
+      allocate(basis%tab_nb(0:basis%LB))
+      allocate(basis%tab_nq(0:basis%LG))
+
+      basis%tab_nb(0) = 1
+      basis%tab_nq(0) = 1
+
+      DO ib=1,size(basis%tab_Pbasis)
+
+        basis%tab_nb(0) =  basis%tab_nb(0) * basis%tab_Pbasis(ib)%Pbasis%nb
+        basis%tab_nq(0) =  basis%tab_nq(0) * basis%tab_Pbasis(ib)%Pbasis%nq
+      END DO
+
+    END IF
+
+    !write(*,*) 'basis%tab_nb',basis%tab_nb
+    !write(*,*) 'basis%tab_nq',basis%tab_nq
+  END SUBROUTINE Set_tab_n_OF_l_Basis_SBG
 END MODULE Basis_SBG_m

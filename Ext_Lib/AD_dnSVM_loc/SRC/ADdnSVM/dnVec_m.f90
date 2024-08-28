@@ -966,7 +966,6 @@ MODULE ADdnSVM_dnVec_m
   END SUBROUTINE AD_dnVec_TO_VecOFdnS
   SUBROUTINE AD_vec_wADDTO_dnVec2_ider(vec1,w1,dnVec2,ider)
     USE QDUtil_m, ONLY : Rkind, out_unit
-    USE ADdnSVM_dnS_m
     IMPLICIT NONE
 
     real (kind=Rkind),  intent(in)            :: vec1(:)
@@ -1167,6 +1166,12 @@ MODULE ADdnSVM_dnVec_m
     integer :: err_dnVec_loc
     character (len=*), parameter :: name_sub='AD_set_dnVec_TO_VecOfR'
 
+    IF (.NOT. Check_Alloc_dnVec(dnVec)) THEN
+      dnVec%d0     = Vec
+      dnVec%nderiv = 0
+      RETURN
+    END IF
+
     nderiv_loc = AD_get_nderiv_FROM_dnVec(dnVec)
     !write(out_unit,*) 'nderiv',nderiv_loc
 
@@ -1177,8 +1182,6 @@ MODULE ADdnSVM_dnVec_m
       write(out_unit,*) '  Check the source'
       STOP
     END IF
-
-
 
     IF (nderiv_loc == 0) THEN
        dnVec%d0 = Vec
@@ -2611,7 +2614,6 @@ MODULE ADdnSVM_dnVec_m
 
   FUNCTION AD_matmul_Mat_dnVec(Mat1,Vec2) RESULT(Vres)
     USE QDUtil_m
-    USE ADdnSVM_dnS_m
     IMPLICIT NONE
 
     TYPE (dnVec_t)                       :: Vres
@@ -2670,7 +2672,6 @@ MODULE ADdnSVM_dnVec_m
 
   FUNCTION AD_matmul_dnVec_Mat(Vec1,Mat2) RESULT(Vres)
     USE QDUtil_m
-    USE ADdnSVM_dnS_m
     IMPLICIT NONE
 
     TYPE (dnVec_t)                       :: Vres

@@ -1,0 +1,6 @@
+  &basis nb_basis=2 name='DP' /
+    &basis nb=2 nq=3 name='BoxAB' A=0. B=1. /
+    &basis nb_basis=2 name='DP' /
+      &basis nb=4 nq=5 name='BoxAB' A=0. B=1. /
+      &basis nb=7 nq=8 name='BoxAB' A=0. B=1. /
+

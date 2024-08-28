@@ -18,4 +18,5 @@ main="Exa_QDBa.f90"
 link = ["blas", "lapack"]
 
 [dependencies]
-QDUtilLib = { git = "https://github.com/lauvergn/QDUtilLib" }
+QDUtilLib = { path = "Ext_lib/QDUtilLib" }
+AD_dnSVM  = { path = "Ext_lib/AD_dnSVM" }

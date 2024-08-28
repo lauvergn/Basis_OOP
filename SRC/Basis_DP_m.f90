@@ -29,6 +29,7 @@
 MODULE Basis_DP_m
   USE Basis_base_m
   USE Basis_HO_m
+  USE Basis_BoxAB_m
   IMPLICIT NONE
   PRIVATE
 
@@ -39,7 +40,9 @@ MODULE Basis_DP_m
   TYPE, EXTENDS (Basis_t) :: Basis_DP_t
     TYPE (Pbasis_t), allocatable :: tab_Pbasis(:)
   CONTAINS
-    PROCEDURE :: Write => Write_Basis_DP
+    PROCEDURE :: Write          => Write_Basis_DP
+    PROCEDURE :: Set_tab_n_OF_l => Set_tab_n_OF_l_Basis_DP
+    PROCEDURE :: Set_ndim       => Set_ndim_Basis_DP
   END TYPE Basis_DP_t
 
   PUBLIC :: Pbasis_t,Basis_DP_t,init_Basis_DP
@@ -89,4 +92,54 @@ MODULE Basis_DP_m
 
     write(out_unit,*) basis%tab_layer,'-------------------------------------'
   END SUBROUTINE Write_Basis_DP
+
+  SUBROUTINE Set_ndim_Basis_DP(basis)
+    USE QDUtil_m, ONLY : Rkind, out_unit
+
+    CLASS (Basis_DP_t), intent(inout) :: basis
+
+    integer :: ib
+
+    basis%ndim = 0
+    DO ib=1,size(basis%tab_Pbasis)
+      basis%ndim = basis%ndim + basis%tab_Pbasis(ib)%Pbasis%ndim
+    END DO
+
+  END SUBROUTINE Set_ndim_Basis_DP
+
+  SUBROUTINE Set_tab_n_OF_l_Basis_DP(basis,LB_in,LG_in)
+    USE QDUtil_m, ONLY : Rkind, out_unit
+
+    CLASS (Basis_DP_t), intent(inout) :: basis
+    integer,            intent(in)    :: LB_in,LG_in
+
+    integer :: ib,l
+
+    IF (LB_in > -1 .AND. LG_in > -1) THEN
+      STOP 'STOP in Set_tab_n_OF_l_Basis_DP: not yet with LB_in,LG_in'
+      allocate(basis%tab_nb(0:LB_in))
+      !basis%tab_nb(0:LB_in) = [((l+1),l=0,LB_in)]
+
+      allocate(basis%tab_nq(0:LG_in))
+      !basis%tab_nq(0:LG_in) = [((l+1),l=0,LG_in)]
+    ELSE
+      allocate(basis%tab_nb(0:0))
+      allocate(basis%tab_nq(0:0))
+
+      basis%tab_nb(0) = 1
+      basis%tab_nq(0) = 1
+
+      DO ib=1,size(basis%tab_Pbasis)
+        basis%tab_nb(0) =  basis%tab_nb(0) * basis%tab_Pbasis(ib)%Pbasis%nb
+        basis%tab_nq(0) =  basis%tab_nq(0) * basis%tab_Pbasis(ib)%Pbasis%nq
+      END DO
+
+      basis%nb = basis%tab_nb(0)
+      basis%nq = basis%tab_nq(0)
+
+    END IF
+
+    !write(*,*) 'basis%tab_nb',basis%tab_nb
+    !write(*,*) 'basis%tab_nq',basis%tab_nq
+  END SUBROUTINE Set_tab_n_OF_l_Basis_DP
 END MODULE Basis_DP_m

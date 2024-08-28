@@ -106,7 +106,7 @@ $(info ***********************************************************************)
 
 VPATH = $(MAIN_DIR):$(TESTS_DIR):$(SRC_DIR)
 
-SRCFILES=BasisInput_m.f90 Basis_SBG_m.f90 Basis_DP_m.f90 Basis_HO_m.f90 Basis_base_m.f90 Basis_m.f90
+SRCFILES=BasisInput_m.f90 Basis_SBG_m.f90 Basis_DP_m.f90 Basis_BoxAB_m.f90 Basis_HO_m.f90 Basis_base_m.f90 Basis_m.f90
 
 OBJ0=${SRCFILES:.f90=.o}
 OBJ=$(addprefix $(OBJ_DIR)/, $(OBJ0))
@@ -133,7 +133,7 @@ exe :$(EXA_QDBaEXE)
 $(EXA_QDBaEXE): $(OBJ_DIR)/Exa_QDBa.o $(LIBA)
 	$(FFC) $(FFLAGS)   -o $(TEST_QDBaEXE) $(OBJ_DIR)/Exa_QDBa.o $(LIBA) $(EXTLib) $(FLIB)
 	@echo "Exa_QDBa compilation: OK"
-	./$(TEST_QDBaEXE) < dat_test
+	./$(TEST_QDBaEXE) < dat_DP
 	@echo "execution"
 #
 #===============================================
@@ -204,10 +204,15 @@ $(LIBA).a:               $(OBJ_lib)
 #
 $(OBJ_DIR)/Basis_m.o:       $(OBJ_DIR)/Basis_SBG_m.o
 $(OBJ_DIR)/Basis_SBG_m.o:   $(OBJ_DIR)/Basis_DP_m.o
-$(OBJ_DIR)/Basis_DP_m.o:    $(OBJ_DIR)/Basis_HO_m.o $(OBJ_DIR)/Basis_base_m.o $(OBJ_DIR)/BasisInput_m.o $(QDLIBA)
-$(OBJ_DIR)/Basis_HO_m.o:    $(OBJ_DIR)/Basis_base_m.o $(QDLIBA)
-$(OBJ_DIR)/Basis_base_m.o:  $(OBJ_DIR)/BasisInput_m.o $(QDLIBA)
+$(OBJ_DIR)/Basis_DP_m.o:    $(OBJ_DIR)/Basis_HO_m.o $(OBJ_DIR)/Basis_BoxAB_m.o \
+                            $(OBJ_DIR)/Basis_base_m.o $(OBJ_DIR)/BasisInput_m.o $(EXTLib)
+$(OBJ_DIR)/Basis_HO_m.o:    $(OBJ_DIR)/BasisInput_m.o $(OBJ_DIR)/Basis_base_m.o $(EXTLib)
+$(OBJ_DIR)/Basis_BoxAB_m.o: $(OBJ_DIR)/BasisInput_m.o $(OBJ_DIR)/Basis_base_m.o $(EXTLib)
+$(OBJ_DIR)/Basis_base_m.o:  $(OBJ_DIR)/BasisInput_m.o $(EXTLib)
 #
-$(OBJ_DIR)/BasisInput_m.o:  $(EXTLib)
+$(OBJ_DIR)/BasisInput_m.o:  | $(EXTLib)
 #
+### Ext_Lib dependencies.
+#it has to be present because the AD_dnSM lib does not use get_Lib.sh yet
+$(ADLIBA) : $(QDLIBA)
 #===============================================

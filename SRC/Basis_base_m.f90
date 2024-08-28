@@ -28,6 +28,7 @@
 !===============================================================================
 MODULE Basis_base_m
   USE QDUtil_m, ONLY : Rkind
+  USE ADdnSVM_m
   IMPLICIT NONE
   PRIVATE
 
@@ -39,8 +40,29 @@ MODULE Basis_base_m
 
     integer :: layer = -1
     character (len=:), allocatable :: tab_layer
+
+    integer, allocatable :: tab_nb(:)
+    integer, allocatable :: tab_nq(:)
+
+    TYPE(dnMat_t), allocatable :: X(:)
+    TYPE(dnVec_t), allocatable :: W(:)
+    TYPE(dnMat_t), allocatable :: GB(:)
+    TYPE(dnMat_t), allocatable :: BGW(:)
+    TYPE(dnMat_t), allocatable :: GG(:)
+    TYPE(dnMat_t), allocatable :: BB(:)
+
   CONTAINS
-    PROCEDURE :: Write  => Write_Basis_base
+    PROCEDURE :: Write          => Write_Basis_base
+
+    PROCEDURE :: Set_tab_n_OF_l => Set_tab_n_OF_l_Basis_base
+    PROCEDURE :: Get_nb         => Get_nb_Basis_base
+    PROCEDURE :: Get_nq         => Get_nq_Basis_base
+
+    PROCEDURE :: Set_Grid       => Set_Grid_Basis_base
+
+    PROCEDURE :: Set_GB         => Set_GB_Basis_base
+    PROCEDURE :: Set_BGW        => Set_BGW_Basis_base
+    PROCEDURE :: CheckOrtho     => CheckOrtho_Basis_base
   END TYPE Basis_t
 
   PUBLIC :: Basis_t,Init_Basis
@@ -70,11 +92,12 @@ MODULE Basis_base_m
 
   END  SUBROUTINE basis2_TO_basis1
   SUBROUTINE Write_Basis_base(basis)
-    USE QDUtil_m, ONLY : Rkind, out_unit
+    USE QDUtil_m, ONLY : Rkind, out_unit, TO_string
+    USE ADdnSVM_m
     CLASS (Basis_t), intent(in) :: basis
 
     character (len=4), parameter :: tab='    '
-    integer :: i
+    integer :: i,l
 
     write(out_unit,*) basis%tab_layer,'-------------------------------------'
     IF (allocated(basis%name)) THEN
@@ -85,8 +108,182 @@ MODULE Basis_base_m
     write(out_unit,*) basis%tab_layer,'ndim=  ',basis%ndim
     write(out_unit,*) basis%tab_layer,'nb=    ',basis%nb
     write(out_unit,*) basis%tab_layer,'nq=    ',basis%nq
+
+    IF (allocated(basis%tab_nb)) THEN
+      write(out_unit,*) basis%tab_layer,'tab_nb:    ',basis%tab_nb
+    ELSE
+      write(out_unit,*) basis%tab_layer,'tab_nb:    not allocated'
+    END IF
+    IF (allocated(basis%tab_nq)) THEN
+      write(out_unit,*) basis%tab_layer,'tab_nq:    ',basis%tab_nq
+    ELSE
+      write(out_unit,*) basis%tab_layer,'tab_nq:    not allocated'
+    END IF
     write(out_unit,*) basis%tab_layer,'layer= ',basis%layer
 
+    write(out_unit,*)
+    IF (allocated(basis%X)) THEN
+      DO l=0,size(basis%X)-1
+        CALL Write_dnMat(basis%X(l), nio=out_unit, info='X(' // TO_string(l) // ')')
+      END DO
+    END IF
+    write(out_unit,*)
+    IF (allocated(basis%W)) THEN
+      DO l=0,size(basis%W)-1
+        CALL Write_dnVec(basis%W(l), nio=out_unit, info='W(' // TO_string(l) // ')')
+      END DO
+    END IF
+    write(out_unit,*)
+    IF (allocated(basis%GB)) THEN
+      DO l=0,size(basis%GB)-1
+        CALL Write_dnMat(basis%GB(l), nio=out_unit, info='GB(' // TO_string(l) // ')')
+      END DO
+    END IF
     write(out_unit,*) basis%tab_layer,'-------------------------------------'
+
   END SUBROUTINE Write_Basis_base
+
+  SUBROUTINE Set_tab_n_OF_l_Basis_base(basis,LB_in,LG_in)
+    !USE QDUtil_m, ONLY : out_unit
+
+    CLASS (Basis_t), intent(inout) :: basis
+    integer,         intent(in)    :: LB_in,LG_in
+
+    integer :: l
+
+    IF (LB_in > -1 .AND. LG_in > -1) THEN
+
+      allocate(basis%tab_nb(0:LG_in))
+      basis%tab_nb(0:LG_in) = [((l+1),l=0,LG_in)]
+
+      allocate(basis%tab_nq(0:LG_in))
+      basis%tab_nq(0:LG_in) = [((l+1),l=0,LG_in)]
+    ELSE
+      allocate(basis%tab_nb(0:0))
+      basis%tab_nb(0) =  basis%nb
+
+      allocate(basis%tab_nq(0:0))
+      basis%tab_nq(0) =  basis%nq
+    END IF
+
+  END SUBROUTINE Set_tab_n_OF_l_Basis_base
+
+  FUNCTION Get_nb_Basis_base(this,l) RESULT(nb)
+    integer :: nb
+
+    CLASS (Basis_t), intent(inout)        :: this
+    integer,         intent(in), optional :: l
+
+    IF (allocated(this%tab_nb)) THEN
+      IF (present(l)) THEN
+        nb = this%tab_nb(l)
+      ELSE
+        nb = this%tab_nb(0)
+      END IF
+    ELSE
+      nb = -1
+    END IF
+
+  END FUNCTION Get_nb_Basis_base
+
+  FUNCTION Get_nq_Basis_base(this,l) RESULT(nq)
+    integer :: nq
+
+    CLASS (Basis_t), intent(inout)        :: this
+    integer,         intent(in), optional :: l
+
+    IF (allocated(this%tab_nq)) THEN
+      IF (present(l)) THEN
+        nq = this%tab_nq(l)
+      ELSE
+        nq = this%tab_nq(0)
+      END IF
+    ELSE
+      nq = -1
+    END IF
+
+  END FUNCTION Get_nq_Basis_base
+
+  SUBROUTINE Set_Grid_Basis_base(this)
+    USE QDUtil_m, ONLY : out_unit
+
+    CLASS (Basis_t), intent(inout) :: this
+
+    write(out_unit,*) 'ERROR in Set_Grid_Basis_base'
+    write(out_unit,*) 'grid cannot be set with Basis_base'
+    STOP 'ERROR in Set_Grid_Basis_base: grid cannot be set'
+
+  END SUBROUTINE Set_Grid_Basis_base
+
+  SUBROUTINE Set_GB_Basis_base(this)
+    USE QDUtil_m, ONLY : out_unit
+    USE ADdnSVM_m
+
+    CLASS (Basis_t), intent(inout) :: this
+
+    write(out_unit,*) 'ERROR in Set_Grid_Basis_base'
+    write(out_unit,*) 'GB cannot be set with Basis_base'
+    STOP 'ERROR in Set_GB_Basis_base: GB cannot be set'
+
+  END SUBROUTINE Set_GB_Basis_base
+  SUBROUTINE Set_BGW_Basis_base(this)
+    USE QDUtil_m, ONLY : out_unit
+    USE ADdnSVM_m
+
+    CLASS (Basis_t), intent(inout) :: this
+
+    integer :: l,ib,LG
+
+    IF (allocated(this%W) .AND. allocated(this%GB)) THEN
+      LG = size(this%W) - 1
+
+      allocate(this%BGW(0:LG))
+      DO l=0,LG
+        this%BGW(l)%d0 = transpose(this%GB(l)%d0)
+
+        DO ib=1,size(this%GB(l)%d0,dim=2)
+          this%BGW(l)%d0(ib,:) = this%BGW(l)%d0(ib,:) * this%w(l)%d0
+        END DO
+      END DO
+    ELSE
+      write(out_unit,*) 'ERROR in Set_BGW_Basis_base'
+      write(out_unit,*) 'GB or W are not allocated'
+      STOP 'ERROR in Set_BGW_Basis_base: GB or W are not allocated'  
+    END IF
+
+  END SUBROUTINE Set_BGW_Basis_base
+  SUBROUTINE CheckOrtho_Basis_base(this)
+    USE QDUtil_m, ONLY : Rkind, ONETENTH, out_unit, Write_Mat, TO_string, Identity_Mat
+    USE ADdnSVM_m
+
+    CLASS (Basis_t), intent(inout) :: this
+
+
+    real (kind=Rkind), allocatable :: SmId(:,:)
+    real (kind=Rkind) :: max_err
+
+
+    integer :: l,LG
+
+    IF (allocated(this%BGW) .AND. allocated(this%GB)) THEN
+      LG = size(this%GB) - 1
+
+      DO l=0,LG
+        SmId = matmul(this%BGW(l)%d0,this%GB(l)%d0) - Identity_Mat(this%tab_nb(l))
+        max_err = maxval(abs(SmId))
+        write(out_unit,*) 'At l=',TO_string(l),' Max error of S-Id',max_err
+        IF (max_err > ONETENTH**6) THEN
+          write(out_unit,*) 'At l=',TO_string(l),'S:'
+          SmId = matmul(this%BGW(l)%d0,this%GB(l)%d0)
+          CALL Write_Mat(SmId,nio=out_unit,nbcol=5)
+        END IF
+        flush(out_unit)
+      END DO
+    ELSE
+      write(out_unit,*) 'ERROR in CheckOrtho_Basis_base'
+      write(out_unit,*) 'GB or BGW are not allocated'
+      STOP 'ERROR in CheckOrtho_Basis_base: GB or BGW are not allocated'  
+    END IF
+
+  END SUBROUTINE CheckOrtho_Basis_base
 END MODULE Basis_base_m
