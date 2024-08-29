@@ -205,14 +205,11 @@ $(LIBA).a:               $(OBJ_lib)
 $(OBJ_DIR)/Basis_m.o:       $(OBJ_DIR)/Basis_SBG_m.o
 $(OBJ_DIR)/Basis_SBG_m.o:   $(OBJ_DIR)/Basis_DP_m.o
 $(OBJ_DIR)/Basis_DP_m.o:    $(OBJ_DIR)/Basis_HO_m.o $(OBJ_DIR)/Basis_BoxAB_m.o \
-                            $(OBJ_DIR)/Basis_base_m.o $(OBJ_DIR)/BasisInput_m.o $(EXTLib)
-$(OBJ_DIR)/Basis_HO_m.o:    $(OBJ_DIR)/BasisInput_m.o $(OBJ_DIR)/Basis_base_m.o $(EXTLib)
-$(OBJ_DIR)/Basis_BoxAB_m.o: $(OBJ_DIR)/BasisInput_m.o $(OBJ_DIR)/Basis_base_m.o $(EXTLib)
-$(OBJ_DIR)/Basis_base_m.o:  $(OBJ_DIR)/BasisInput_m.o $(EXTLib)
+                            $(OBJ_DIR)/Basis_base_m.o $(OBJ_DIR)/BasisInput_m.o | $(EXTLib)
+$(OBJ_DIR)/Basis_HO_m.o:    $(OBJ_DIR)/BasisInput_m.o $(OBJ_DIR)/Basis_base_m.o | $(EXTLib)
+$(OBJ_DIR)/Basis_BoxAB_m.o: $(OBJ_DIR)/BasisInput_m.o $(OBJ_DIR)/Basis_base_m.o | $(EXTLib)
+$(OBJ_DIR)/Basis_base_m.o:  $(OBJ_DIR)/BasisInput_m.o | $(EXTLib)
 #
 $(OBJ_DIR)/BasisInput_m.o:  | $(EXTLib)
 #
-### Ext_Lib dependencies.
-#it has to be present because the AD_dnSM lib does not use get_Lib.sh yet
-$(ADLIBA) : $(QDLIBA)
 #===============================================

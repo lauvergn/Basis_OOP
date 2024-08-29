@@ -1,1 +1,14 @@
-rm -rf QDUtilLib*
+#!/bin/bash
+
+#remove le link
+rm -f QDUtilLib
+
+for dirlib in *loc
+do
+  echo $dirlib
+  cd $dirlib
+  make --silent cleanall &> /dev/null
+  test -d Ext_lib && rm -rf Ext_lib/Save*.zip
+  cd ..
+done
+

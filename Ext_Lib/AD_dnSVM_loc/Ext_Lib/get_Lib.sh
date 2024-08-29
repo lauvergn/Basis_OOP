@@ -16,26 +16,30 @@ if (test -d "$DIR" ) then
   rm -f $LOC_version
   echo $DIR directory exist. Adding the link.
   ln -s $DIR $LOC_version
+  if (test -e $LOC_version) then
+    echo End get_Lib.sh $BaseName
+    exit 0
+  fi
 fi
 fi
 
-if (test -L $LOC_version -a -L $LOC_version) then
-  echo $LOC_version directory exist and is a symbolic link. 
-  echo End get_Lib.sh $BaseName
+
+if (test -d $LOC_version) then
+  echo $LOC_version directory exist
   exit 0
 else
-  echo $LOC_version directory does not exist.
+  echo $LOC_version does not directory exist.
   if (test -d $LOC_version"_loc") then
     echo $LOC_version"_loc" directory exist. Adding the link.
-    rm -rf $LOC_version"_loc"/.git $LOC_version"_loc"/Ext_Lib/*_loc
     ln -s $LOC_version"_loc" $LOC_version
-    if (test -L $LOC_version -a -L $LOC_version) then
-      echo $LOC_version directory exist and is a symbolic link.
+    if (test -e $LOC_version) then
       echo End get_Lib.sh $BaseName
       exit 0
     fi
   fi
 fi
+
+
 
 
 #1) try to get from github
@@ -48,17 +52,14 @@ if (test -f $zipfile) then
   DIRName=`unzip -Z -1 $zipfile | head -1 `
   unzip $zipfile
   mv $DIRName $LOC_version"_loc"
-  if (test -d $LOC_version"_loc") then
-    rm -rf $LOC_version"_loc"/.git $LOC_version"_loc"/Ext_Lib/*_loc
-    ln -s $LOC_version"_loc" $LOC_version
-  fi
+  ln -s $LOC_version"_loc" $LOC_version
   rm -f $zipfile
 else
   echo $LOC_version.zip from github does not exist.
 fi
 
-if (test -L $LOC_version -a -L $LOC_version) then
-  echo $LOC_version "directory exist (from github) and is a symbolic link."
+if (test -d $LOC_version) then 
+  echo $LOC_version file exist from github
   echo End get_Lib.sh $BaseName
   exit 0
 fi
