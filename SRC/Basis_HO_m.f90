@@ -50,11 +50,13 @@ MODULE Basis_HO_m
 
     !write(out_unit,*) 'Beginning init_Basis_HO'
 
-    this%basis_t = Init_Basis(basisIn)
+    this%basis_t    = Init_Basis(basisIn)
 
-    this%ndim    = 1
-    this%Q0      = basisIn%Q0
-    this%ScQ     = basisIn%ScQ
+    this%ndim       = 1
+    this%primitive  = .TRUE.
+
+    this%Q0         = basisIn%Q0(1:1)
+    this%ScQ        = basisIn%ScQ(1:1)
 
   END FUNCTION init_Basis_HO
   SUBROUTINE Write_Basis_HO(this)
@@ -64,8 +66,6 @@ MODULE Basis_HO_m
 
     write(out_unit,*) this%tab_layer,'-------------------------------------'
     CALL this%Basis_t%write()
-    write(out_unit,*) this%tab_layer,'Q0= ',this%Q0
-    write(out_unit,*) this%tab_layer,'ScQ=',this%ScQ
     write(out_unit,*) this%tab_layer,'-------------------------------------'
 
   END SUBROUTINE Write_Basis_HO

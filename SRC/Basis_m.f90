@@ -59,24 +59,15 @@ CONTAINS
       ! its means only one primitive basis
       allocate(Basis_HO_t :: basis)
       basis = init_Basis_HO(BasisIn)
-      CALL basis%Set_tab_n_OF_l(BasisIn%LB_in,BasisIn%LG_in)
+      CALL basis%Set_tab_n_OF_l(BasisIn%LG_in)
 
     CASE ('boxab')
       !write(out_unit,*) 'BoxAB basis'
       ! its means only one primitive basis
       allocate(Basis_BoxAB_t :: basis)
       basis = init_Basis_BoxAB(BasisIn)
+      CALL basis%Set_tab_n_OF_l(BasisIn%LG_in)
 
-      CALL basis%Set_tab_n_OF_l(BasisIn%LB_in,BasisIn%LG_in)
-      CALL basis%build()
-
-      !CALL basis%Set_Grid()
-      !CALL basis%Set_GB()
-      !CALL basis%Scale()
-      !CALL basis%Set_BGW()
-      !CALL basis%Set_BB()
-      !CALL basis%Set_GG()
-      !CALL basis%CheckOrtho()
     CASE ('dp')
       !write(out_unit,*) 'DP basis'
       allocate(Basis_DP_t :: basis)
@@ -88,25 +79,28 @@ CONTAINS
     CASE default
       STOP 'no default'
     END SELECT
+
     basis%layer     = layer + 1
     basis%tab_layer = make_tab_layer(layer)
+
+    IF (basis%primitive) CALL basis%build()
+    
     CALL BasisIn%dealloc()
-
-
+    
     SELECT TYPE (basis)
     TYPE IS(Basis_DP_t)
       DO ib=1,BasisIn%nb_basis
         CALL Read_Basis(basis%tab_Pbasis(ib)%PBasis,basis%layer)
       END DO
       CALL basis%Set_ndim()
-      CALL basis%Set_tab_n_OF_l(-1,-1)
+      CALL basis%Set_tab_n_OF_l(-1)
       
     TYPE IS(Basis_SBG_t)
       DO ib=1,BasisIn%nb_basis
         CALL Read_Basis(basis%tab_Pbasis(ib)%PBasis,basis%layer)
       END DO
       CALL basis%Set_ndim()
-      CALL basis%Set_tab_n_OF_l(basis%LB,basis%LG)
+      CALL basis%Set_tab_n_OF_l(basis%LG)
     END SELECT
 
   END SUBROUTINE Read_Basis

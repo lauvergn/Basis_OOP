@@ -107,18 +107,18 @@ MODULE Basis_DP_m
 
   END SUBROUTINE Set_ndim_Basis_DP
 
-  SUBROUTINE Set_tab_n_OF_l_Basis_DP(this,LB_in,LG_in)
+  SUBROUTINE Set_tab_n_OF_l_Basis_DP(this,LG_in)
     USE QDUtil_m, ONLY : Rkind, out_unit
 
     CLASS (Basis_DP_t), intent(inout) :: this
-    integer,            intent(in)    :: LB_in,LG_in
+    integer,            intent(in)    :: LG_in
 
     integer :: ib,l
 
-    IF (LB_in > -1 .AND. LG_in > -1) THEN
+    IF (LG_in > -1) THEN
       STOP 'STOP in Set_tab_n_OF_l_Basis_DP: not yet with LB_in,LG_in'
-      allocate(this%tab_nb(0:LB_in))
-      !this%tab_nb(0:LB_in) = [((l+1),l=0,LB_in)]
+      allocate(this%tab_nb(0:LG_in))
+      !this%tab_nb(0:LG_in) = [((l+1),l=0,LG_in)]
 
       allocate(this%tab_nq(0:LG_in))
       !this%tab_nq(0:LG_in) = [((l+1),l=0,LG_in)]

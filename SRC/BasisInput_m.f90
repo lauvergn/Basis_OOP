@@ -36,11 +36,11 @@ MODULE BasisInput_m
     integer                        :: nb_basis = 0
     character (len=:), allocatable :: name
 
-    real (kind=Rkind)              :: Q0  = ZERO
-    real (kind=Rkind)              :: ScQ = ONE
+    real (kind=Rkind), allocatable :: Q0(:)
+    real (kind=Rkind), allocatable :: ScQ(:)
 
-    real (kind=Rkind)              :: A = ZERO
-    real (kind=Rkind)              :: B = ONE
+    real (kind=Rkind), allocatable :: A(:)
+    real (kind=Rkind), allocatable :: B(:)
 
     integer                        :: LB = -1
     integer                        :: LG = -1
@@ -56,19 +56,26 @@ MODULE BasisInput_m
   PUBLIC :: BasisInput_t
 
   CONTAINS
-  SUBROUTINE Read_BasisInput(BasisInput,LB_in,LG_in)
+  SUBROUTINE Read_BasisInput(BasisInput,LG_in)
     USE QDUtil_m
 
     CLASS (BasisInput_t), intent(inout)        :: BasisInput
-    integer,              intent(in), optional :: LB_in,LG_in
+    integer,              intent(in), optional :: LG_in
 
+    integer, parameter :: max_ndim = 10
 
     integer            :: nb,nq,nb_basis,LB,LG
     character (len=50) :: name
-    real (kind=Rkind)  :: Q0,ScQ
-    real (kind=Rkind)  :: A,B
+    real (kind=Rkind), allocatable  :: Q0(:),ScQ(:)
+    real (kind=Rkind), allocatable  :: A(:),B(:)
 
     namelist / basis / nb,nq,name,Q0,ScQ,A,B,nb_basis,LB,LG
+
+    allocate(Q0(max_ndim))
+    allocate(ScQ(max_ndim))
+    allocate(A(max_ndim))
+    allocate(B(max_ndim))
+
 
     nb       = 0
     nq       = 0
@@ -97,21 +104,11 @@ MODULE BasisInput_m
     BasisInput%LB_in    = -1
     BasisInput%LG_in    = -1
 
-    IF (present(LB_in) .OR. present(LG_in)) THEN
+    IF (present(LG_in)) THEN
       BasisInput%nb       = 0
       BasisInput%nq       = 0
-      BasisInput%LB       = -1
-      BasisInput%LG       = -1
-      IF (present(LB_in)) THEN 
-        BasisInput%LB       = LB
-      ELSE
-        BasisInput%LB       = LG
-      END IF
-      IF (present(LG_in)) THEN 
-        BasisInput%LG       = LG
-      ELSE
-        BasisInput%LG       = LB
-      END IF
+      BasisInput%LB       = LG_in
+      BasisInput%LG       = LG_in
     ELSE
       BasisInput%nb       = nb
       IF (nq < 1) nq = nb

@@ -33,8 +33,8 @@ MODULE Basis_BoxAB_m
   PRIVATE
 
   TYPE, EXTENDS (Basis_t) :: Basis_BoxAB_t
-    real (kind=Rkind) :: A
-    real (kind=Rkind) :: B
+    real (kind=Rkind), allocatable :: A(:)
+    real (kind=Rkind), allocatable :: B(:)
   CONTAINS
     PROCEDURE :: Write     => Write_Basis_BoxAB
     PROCEDURE :: Set_Grid  => Set_Grid_Basis_BoxAB
@@ -53,14 +53,15 @@ MODULE Basis_BoxAB_m
 
     !write(out_unit,*) 'Beginning init_Basis_BoxAB'
 
-    this%basis_t = Init_Basis(basisIn)
+    this%basis_t    = Init_Basis(basisIn)
 
-    this%ndim   = 1
-    this%A      = basisIn%A
-    this%B      = basisIn%B
+    this%ndim       = 1
+    this%primitive  = .TRUE.
+    this%A          = basisIn%A(1:1)
+    this%B          = basisIn%B(1:1)
 
-    this%Q0     = this%A
-    this%ScQ    = PI/(this%B-this%A)
+    this%Q0         = this%A
+    this%ScQ        = PI/(this%B-this%A)
 
   END FUNCTION init_Basis_BoxAB
   SUBROUTINE Write_Basis_BoxAB(this)
@@ -70,8 +71,13 @@ MODULE Basis_BoxAB_m
 
     write(out_unit,*) this%tab_layer,'-------------------------------------'
     CALL this%Basis_t%write()
-    write(out_unit,*) this%tab_layer,'A= ',this%A
-    write(out_unit,*) this%tab_layer,'B= ',this%B
+    IF (allocated(this%A) .AND. allocated(this%B)) THEN
+      write(out_unit,*) this%tab_layer,'A= ',this%A
+      write(out_unit,*) this%tab_layer,'B= ',this%B
+    ELSE
+      write(out_unit,*) this%tab_layer,' A or B are not allocated'
+    END IF
+
     write(out_unit,*) this%tab_layer,'-------------------------------------'
 
   END SUBROUTINE Write_Basis_BoxAB

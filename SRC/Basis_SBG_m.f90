@@ -73,16 +73,16 @@ CONTAINS
 
   END SUBROUTINE Write_Basis_SBG
 
-  SUBROUTINE Set_tab_n_OF_l_Basis_SBG(this,LB_in,LG_in)
+  SUBROUTINE Set_tab_n_OF_l_Basis_SBG(this,LG_in)
     USE QDUtil_m, ONLY : Rkind, out_unit
 
     CLASS (Basis_SBG_t), intent(inout) :: this
-    integer,            intent(in)     :: LB_in,LG_in
+    integer,            intent(in)     :: LG_in
 
     integer :: ib,l
 
-    IF (LB_in > -1 .AND. LG_in > -1) THEN
-      STOP 'STOP in Set_tab_n_OF_l_Basis_SBG: not yet with LB_in,LG_in'
+    IF (LG_in > -1) THEN
+      STOP 'STOP in Set_tab_n_OF_l_Basis_SBG: not yet with LG_in'
 
     ELSE
       STOP 'STOP in Set_tab_n_OF_l_Basis_SBG: not yet' 

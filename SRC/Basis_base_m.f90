@@ -37,8 +37,10 @@ MODULE Basis_base_m
     integer :: nq   = 0
     integer :: ndim = 0
 
-    real (kind=Rkind) :: Q0
-    real (kind=Rkind) :: ScQ
+    logical :: primitive = .FALSE.
+
+    real (kind=Rkind), allocatable :: Q0(:)
+    real (kind=Rkind), allocatable :: ScQ(:)
 
     character (len=:), allocatable :: name
 
@@ -111,6 +113,7 @@ MODULE Basis_base_m
       write(out_unit,*) this%tab_layer,'name: not initialized!'
     END IF
     write(out_unit,*) this%tab_layer,'ndim=  ',this%ndim
+    write(out_unit,*) this%tab_layer,'primitive: ',this%primitive
 
     IF (allocated(this%tab_nb)) THEN
       write(out_unit,*) this%tab_layer,'tab_nb:    ',this%tab_nb
@@ -123,6 +126,14 @@ MODULE Basis_base_m
       write(out_unit,*) this%tab_layer,'tab_nq:    not allocated'
     END IF
     write(out_unit,*) this%tab_layer,'layer= ',this%layer
+
+    IF (allocated(this%Q0) .AND. allocated(this%ScQ)) THEN
+      write(out_unit,*) this%tab_layer,'Q0=  ',this%Q0
+      write(out_unit,*) this%tab_layer,'ScQ= ',this%ScQ
+    ELSE
+      write(out_unit,*) this%tab_layer,' Q0 or ScQ are not allocated'
+    END IF
+
 
     write(out_unit,*)
     IF (allocated(this%X)) THEN
@@ -169,15 +180,15 @@ MODULE Basis_base_m
 
   END SUBROUTINE Write_Basis_base
 
-  SUBROUTINE Set_tab_n_OF_l_Basis_base(this,LB_in,LG_in)
+  SUBROUTINE Set_tab_n_OF_l_Basis_base(this,LG_in)
     !USE QDUtil_m, ONLY : out_unit
 
     CLASS (Basis_t), intent(inout) :: this
-    integer,         intent(in)    :: LB_in,LG_in
+    integer,         intent(in)    :: LG_in
 
     integer :: l
 
-    IF (LB_in > -1 .AND. LG_in > -1) THEN
+    IF (LG_in > -1) THEN
 
       allocate(this%tab_nb(0:LG_in))
       this%tab_nb(0:LG_in) = [((l+1),l=0,LG_in)]
@@ -475,26 +486,44 @@ MODULE Basis_base_m
 
 
   SUBROUTINE Scale_Basis_base(this)
-    USE QDUtil_m, ONLY : ZERO, ONE, out_unit
+    USE QDUtil_m, ONLY : ZERO, ONE, Rkind, out_unit
     USE ADdnSVM_m
 
     CLASS (Basis_t), intent(inout) :: this
 
-    integer           :: l,LG
+    real (kind=Rkind) :: ScQ
+    integer           :: i,j,l,LG
+    logical           :: not_scaled
 
-    IF (this%ScQ == ONE .AND. this%Q0 == ZERO) RETURN
+    not_scaled = .TRUE.
+    DO i=1,this%ndim
+      not_scaled  =  not_scaled .AND. (this%Q0(i)  == ZERO .AND. this%ScQ(i) == ONE)
+    END DO
+    IF (not_scaled) RETURN
+
+    ScQ = product(this%ScQ)
+
 
     IF (allocated(this%GB) .AND. allocated(this%X) .AND. allocated(this%W)) THEN
 
       LG = size(this%GB)-1
 
       DO l=0,LG
-        this%X(l) = this%Q0 + this%X(l) * (ONE / this%ScQ)
-        this%W(l) =           this%W(l) / this%ScQ
+        DO i=1,this%ndim
+          this%X(l)%d0(i,:) = this%Q0(i) + this%X(l)%d0(i,:) / this%ScQ(i)
+        END DO
+        this%W(l) =           this%W(l) / ScQ
 
-        this%GB(l)%d0 = this%GB(l)%d0 * sqrt(this%ScQ)
-        this%GB(l)%d1 = this%GB(l)%d1 * sqrt(this%ScQ)*this%ScQ
-        this%GB(l)%d2 = this%GB(l)%d2 * sqrt(this%ScQ)*this%ScQ**2
+        this%GB(l)%d0(:,:) = this%GB(l)%d0(:,:) * sqrt(ScQ)
+        DO i=1,this%ndim
+          this%GB(l)%d1(:,:,i) = this%GB(l)%d1(:,:,i) * sqrt(ScQ)*this%ScQ(i)
+        END DO
+
+        DO j=1,this%ndim
+        DO i=1,this%ndim
+          this%GB(l)%d2(:,:,i,j) = this%GB(l)%d2(:,:,i,j) * sqrt(ScQ)*this%ScQ(i)*this%ScQ(j)
+        END DO
+        END DO
 
       END DO
     ELSE
