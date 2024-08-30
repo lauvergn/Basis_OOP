@@ -7,7 +7,8 @@ Basis_OOP
 
 - The primitive basis sets are:
   - Harmonic Oscilator, **HO**
-  - Others are in prevision (sine or **BoxAB**, **Fourier** ...)
+  - Particule-in-a-box, **BoxAB**
+  - Others are in prevision (**Fourier** ...)
 
 
 Right now, the library is doing only the reading and the writing.
@@ -47,16 +48,6 @@ make all FC=ifort OMP=0 OPT=0 LAPACK=0 INT=4
   # LAPACK=0/1 to turn off/on the lapack use
   # INT=4/8 to change the default integer
 ```
-
-The library, **libAD_dnSVM_XXX_oppY_ompZ_lapackW_intV.a** is created in the main directory and the **libAD_dnSVM.a** library is linked to it.
-Remarks : 
-- XXX is the compiller (gfortran, ifort ...)
-- Y is 0 or 1 (opt0 / opt1: compiler optimization)
-- Z is 0 or 1 (omp0 / omp1: whitout/with OpenMP)
-- W is 0 or 1 (lapack0 / lapack1: whitout/with lapack)
-- V is 4 or 8 (int4 / int8)
-
-If needed, the .mod files are in the **OBJ/obj_XXX_oppY_ompZ_lapackW_intV** directory.
 
 ## 3) run the example
 
