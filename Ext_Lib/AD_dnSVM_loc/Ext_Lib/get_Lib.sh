@@ -14,32 +14,37 @@ LOC_version=$BaseName
 if (! test -z "$DIR" ) then
 if (test -d "$DIR" ) then
   rm -f $LOC_version
-  echo $DIR directory exist. Adding the link.
+  echo the DIR variable is not empty and $DIR directory exist. Adding the link.
   ln -s $DIR $LOC_version
-  if (test -e $LOC_version) then
+  if (test -L $LOC_version -a -d $LOC_version) then
+    echo $LOC_version directory exist and is a symbolic link. 
+    ls -la $LOC_version
     echo End get_Lib.sh $BaseName
     exit 0
   fi
 fi
 fi
 
-
-if (test -d $LOC_version) then
-  echo $LOC_version directory exist
+if (test -L $LOC_version -a -d $LOC_version) then
+  echo $LOC_version directory exist and is a symbolic link. 
+  echo The symbolic link is unchanged.
+  ls -la $LOC_version
+  echo End get_Lib.sh $BaseName
   exit 0
 else
-  echo $LOC_version does not directory exist.
+  echo $LOC_version directory does not exist.
   if (test -d $LOC_version"_loc") then
     echo $LOC_version"_loc" directory exist. Adding the link.
+    rm -rf $LOC_version"_loc"/.git $LOC_version"_loc"/Ext_Lib/*_loc
     ln -s $LOC_version"_loc" $LOC_version
-    if (test -e $LOC_version) then
+    if (test -L $LOC_version -a -d $LOC_version) then
+      echo $LOC_version directory exist and is a symbolic link.
+      ls -la $LOC_version
       echo End get_Lib.sh $BaseName
       exit 0
     fi
   fi
 fi
-
-
 
 
 #1) try to get from github
@@ -52,14 +57,18 @@ if (test -f $zipfile) then
   DIRName=`unzip -Z -1 $zipfile | head -1 `
   unzip $zipfile
   mv $DIRName $LOC_version"_loc"
-  ln -s $LOC_version"_loc" $LOC_version
+  if (test -d $LOC_version"_loc") then
+    rm -rf $LOC_version"_loc"/.git $LOC_version"_loc"/Ext_Lib/*_loc
+    ln -s $LOC_version"_loc" $LOC_version
+  fi
   rm -f $zipfile
 else
   echo $LOC_version.zip from github does not exist.
 fi
 
-if (test -d $LOC_version) then 
-  echo $LOC_version file exist from github
+if (test -L $LOC_version -a -d $LOC_version) then
+  echo $LOC_version "directory exist (from github) and is a symbolic link."
+  ls -la $LOC_version
   echo End get_Lib.sh $BaseName
   exit 0
 fi
@@ -75,12 +84,14 @@ if (test -f $zipfile) then
   DIRName=`unzip -Z -1 $zipfile | head -1 `
   unzip $zipfile
   mv $DIRName $LOC_version"_loc"
+  rm -rf $LOC_version"_loc"/.git $LOC_version"_loc"/Ext_Lib/*_loc
   ln -s $LOC_version"_loc" $LOC_version
 fi
 
 #3) last test
-if (test -d $LOC_version) then
+if (test -L $LOC_version -a -d $LOC_version) then
   echo $LOC_version file exist from $ExtLibSAVEDIR
+  ls -la $LOC_version
   echo End get_Lib.sh $BaseName
   exit 0
 else

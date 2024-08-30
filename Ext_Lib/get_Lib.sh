@@ -4,6 +4,10 @@
 BaseName=$1
 DIR=$2
 
+#github versions
+version="https://github.com/lauvergn/"$BaseName"/archive/refs/heads/main.zip"
+version="https://github.com/lauvergn/"$BaseName"/archive/refs/heads/"$BaseName"_dev.zip"
+
 echo In get_Lib.sh $BaseName
 
 
@@ -48,8 +52,7 @@ fi
 
 
 #1) try to get from github
-#latest HEAD version
-version="https://github.com/lauvergn/"$BaseName"/archive/refs/heads/main.zip"
+#latest HEAD version (defined at the beginning of the script)
 curl -LJ $version --output $LOC_version.zip
 zipfile=$LOC_version.zip
 if (test -f $zipfile) then
