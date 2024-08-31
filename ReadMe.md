@@ -60,5 +60,6 @@ With **fpm**
 or in the Tests directory, run the scripts
 
 ```bash
-    ./Test_QDBa.x < dat_test
+    ./Test_QDBa.x < dat_DP
 ```
+
