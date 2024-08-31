@@ -1,9 +1,9 @@
 Basis_OOP
 
-**Basis_OOP** is a Fortran program to deal with basis sets denfined as a tree:
+**Basis_OOP** is a Fortran program to deal with basis sets defined as a tree:
 
 - Each branch can be of **DP** (direct product) type/class or **SBG** (Smolyak Sparse Basis/Grid).
-- Each leaf are primitive basis set.
+- Each leaf is a primitive basis set.
 
 - The primitive basis sets are:
   - Harmonic Oscilator, **HO**
@@ -11,10 +11,12 @@ Basis_OOP
   - Others are in prevision (**Fourier** ...)
 
 
-Right now, the library is doing only the reading and the writing.
+Right now, the library can do:
+- the reading, the writing
+- the setting of some primitive basis set (**BoxAB**)
 
 
-date: 23/08/2024
+date: 31/08/2024
 
   Copyright 2024 David Lauvergnat [1]
 
