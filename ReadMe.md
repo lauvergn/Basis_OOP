@@ -27,6 +27,10 @@ The basis set tree is read from an input file (std input) and an example is give
 
 ## 2) Installation
 
+So it has been tested with:
+- gfortran: mac, linux (it is working on github codespaces with gfortran 9)
+- ifort, ifx
+
 ### a) With fpm:
 
 ```bash
