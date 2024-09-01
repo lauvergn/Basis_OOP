@@ -18,6 +18,9 @@ version="https://github.com/lauvergn/"$BaseName"/archive/refs/heads/"$Branch".zi
 #https://github.com/lauvergn/QDUtilLib/archive/refs/heads/dev.zip
 #https://github.com/lauvergn/QDUtilLib/archive/refs/heads/main.zip
 
+#https://github.com/lauvergn/AD_dnSVM/archive/refs/heads/main.zip
+#https://github.com/lauvergn/AD_dnSVM/archive/refs/heads/dev.zip
+
 echo In get_Lib.sh $BaseName
 
 

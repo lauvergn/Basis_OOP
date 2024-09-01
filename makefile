@@ -185,8 +185,8 @@ zip: cleanall
 #
 .PHONY: getlib
 getlib:
-	cd $(ExtLibDIR) ; ./get_Lib.sh QDUtilLib
-	cd $(ExtLibDIR) ; ./get_Lib.sh AD_dnSVM
+	cd $(ExtLibDIR) ; ./get_Lib.sh QDUtilLib dev
+	cd $(ExtLibDIR) ; ./get_Lib.sh AD_dnSVM dev
 #
 $(QDLIBA):
 	cd $(ExtLibDIR) ; ./get_Lib.sh QDUtilLib
