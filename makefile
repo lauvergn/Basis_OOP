@@ -188,13 +188,11 @@ getlib:
 	cd $(ExtLibDIR) ; ./get_Lib.sh QDUtilLib dev
 	cd $(ExtLibDIR) ; ./get_Lib.sh AD_dnSVM dev
 #
-$(QDLIBA):
-	cd $(ExtLibDIR) ; ./get_Lib.sh QDUtilLib
+$(QDLIBA): getlib
 	cd $(ExtLibDIR)/QDUtilLib ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR) CompilersDIR=$(CompilersDIR)
 	@test -f $(QDLIBA) || (echo $(QDLIBA) "does not exist" ; exit 1)
 	@echo "  done " $(QDLIBA)
-$(ADLIBA):
-	cd $(ExtLibDIR) ; ./get_Lib.sh AD_dnSVM
+$(ADLIBA): getlib
 	cd $(ExtLibDIR)/AD_dnSVM ; make lib FC=$(FFC) OPT=$(OOPT) OMP=$(OOMP) LAPACK=$(LLAPACK) INT=$(INT) ExtLibDIR=$(ExtLibDIR) CompilersDIR=$(CompilersDIR)
 	@test -f $(ADLIBA) || (echo $(ADLIBA) "does not exist" ; exit 1)
 	@echo "  done " $(ADLIBA)
