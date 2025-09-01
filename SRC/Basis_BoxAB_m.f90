@@ -83,12 +83,14 @@ MODULE Basis_BoxAB_m
   END SUBROUTINE Write_Basis_BoxAB
 
   SUBROUTINE Set_Grid_Basis_BoxAB(this)
-    USE QDUtil_m, ONLY : Rkind, HALF, PI, out_unit
+    USE QDUtil_m, ONLY : Rkind, out_unit, Quadrature_t, Init_Quadrature_HP, dealloc_Quadrature
 
     CLASS (Basis_BoxAB_t), intent(inout) :: this
 
-    real (kind=Rkind) :: dx
-    integer :: l,i,LG,nql
+    integer :: l,LG,nql
+
+    TYPE (Quadrature_t) :: xw
+    integer :: err
 
     IF (allocated(this%tab_nq)) THEN
 
@@ -98,10 +100,16 @@ MODULE Basis_BoxAB_m
 
       DO l=0,LG
         nql = this%get_nq(l)
-        dx  = PI/nql
-        this%X(l) = reshape([(dx*(-HALF+i),i=1,nql)],shape=[1,nql])
-        this%W(l) = [(dx,i=1,nql)]
+        CALL Init_Quadrature_HP(xw,nql,name='sine',err=err)
+        IF (err /=0) THEN
+          write(out_unit,*) 'ERROR in Set_Grid_Basis_BoxAB'
+          write(out_unit,*) 'Problem with the "Init_Quadrature_HP" subroutine (QDUtil module)'
+          STOP 'ERROR in Set_Grid_Basis_BoxAB: Problem with the "Init_Quadrature_HP" subroutine (QDUtil module)'
+        END IF
+        this%X(l) = xw%x
+        this%W(l) = xw%w
       END DO
+      CALL dealloc_Quadrature(xw)
     ELSE
       write(out_unit,*) 'ERROR in Set_Grid_Basis_BoxAB'
       write(out_unit,*) 'tab_nq is not allocated'
