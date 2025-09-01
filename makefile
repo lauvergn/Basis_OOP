@@ -169,6 +169,9 @@ cleanall: clean
 	rm -rf OBJ
 	cd $(MAIN_path)/Ext_Lib ; ./cleanlib
 	@echo "  done remove *.a libraries and OBJ directory"
+cleanlocextlib: cleanall
+	cd $(MAIN_path)/Ext_Lib ; rm -rf *_loc
+	@echo "  done remove all local library directories (..._loc)"
 #===============================================
 #================ zip and copy the directory ===
 ExtLibSAVEDIR := /Users/lauvergn/git/Ext_Lib
