@@ -124,17 +124,24 @@ $(info ***********LIBA:              $(LIBA))
 #============= Main programs: tests + example ==
 #
 .PHONY: all
-all: exe
+all: exe ut
 
 # Example Exa_QDBa
 .PHONY: exe
 exe :$(EXA_QDBaEXE)
-	@echo "Exa_QDBa compilation: OK"
+	./$(EXA_QDBaEXE) < Tests/dat_DP  > Tests/Test.log
+	@echo "execution"
 $(EXA_QDBaEXE): $(OBJ_DIR)/Exa_QDBa.o $(LIBA)
+	$(FFC) $(FFLAGS)   -o $(EXA_QDBaEXE) $(OBJ_DIR)/Exa_QDBa.o $(LIBA) $(EXTLib) $(FLIB)
+	@echo "Exa_QDBa compilation: OK"
+# Test Test_QDBa
+.PHONY: ut UT
+ut UT :$(TEST_QDBaEXE)
+	./$(TEST_QDBaEXE) < Tests/dat_DP > Tests/Test.log
+	@echo "execution"
+$(TEST_QDBaEXE): $(OBJ_DIR)/Exa_QDBa.o $(LIBA)
 	$(FFC) $(FFLAGS)   -o $(TEST_QDBaEXE) $(OBJ_DIR)/Exa_QDBa.o $(LIBA) $(EXTLib) $(FLIB)
 	@echo "Exa_QDBa compilation: OK"
-	./$(TEST_QDBaEXE) < dat_DP
-	@echo "execution"
 #
 #===============================================
 #============= compilation =====================
