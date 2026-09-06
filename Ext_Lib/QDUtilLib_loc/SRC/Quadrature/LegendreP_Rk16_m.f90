@@ -27,6 +27,11 @@
 !===============================================================================
 !===============================================================================
 MODULE QDUtil_LegendreP_Rk16_m
+#ifndef __WITHRK16
+#define __WITHRK16 1
+#endif
+#if __WITHRK16 == 1
+
   USE QDUtil_NumParameters_m, ONLY : out_unit, Rkind => Rk16, pi => pi_Rk16
   IMPLICIT NONE
 
@@ -145,5 +150,6 @@ CONTAINS
     END DO
 
   END SUBROUTINE X_LegendreP_Rk16_QDUtil
+#endif
 
 END MODULE QDUtil_LegendreP_Rk16_m

@@ -38,7 +38,7 @@ MODULE Basis_m
   PRIVATE :: make_tab_layer
 
 CONTAINS
-  RECURSIVE SUBROUTINE Read_Basis(basis,layer)
+  RECURSIVE SUBROUTINE ReadInit_Basis(basis,layer,LG_in)
     USE QDUtil_m
     USE BasisInput_m
     USE Basis_base_m
@@ -46,12 +46,40 @@ CONTAINS
     USE Basis_BoxAB_m
     CLASS (Basis_t), intent(inout), allocatable :: basis
     integer,         intent(in)                 :: layer
+    integer,         intent(in),    optional    :: LG_in
 
     TYPE (BasisInput_t) :: BasisIn
     integer :: ib
 
-    CALL BasisIn%Read()
-    !CALL BasisIn%Write()
+    !-----------------------------------------------------------------------
+    !logical, parameter :: debug=.TRUE.
+    logical, parameter :: debug=.FALSE.
+    character(len=*), parameter :: name_sub='ReadInit_Basis@Basis_m'
+    !-----------------------------------------------------------------------
+    IF (debug) THEN
+      write(out_unit,*) 'BEGINNING ',name_sub
+      write(out_unit,*) 'layer ',layer
+      IF (present(LG_in)) THEN
+        write(out_unit,*) 'LG_in ',LG_in
+      ELSE
+        write(out_unit,*) 'LG_in: not present'
+      END IF
+      flush(out_unit)
+      IF (allocated(basis)) THEN 
+        CALL basis%write()
+      ELSE
+        write(out_unit,*) 'basis: not allocated'
+      END IF
+      flush(out_unit)
+    END IF
+    !-----------------------------------------------------------------------
+    IF (present(LG_in)) THEN
+      CALL BasisIn%Read(LG_in)
+    ELSE
+      CALL BasisIn%Read()
+    END IF
+    IF (print_level > 0 .OR. debug) write(out_unit,*) 'basis namelist read: done ',BasisIn%name
+
 
     SELECT CASE (BasisIn%name)
     CASE ('ho')
@@ -72,38 +100,60 @@ CONTAINS
       !write(out_unit,*) 'DP basis'
       allocate(Basis_DP_t :: basis)
       basis = init_Basis_DP(BasisIn)
-    CASE ('sbg')
+    CASE ('sbg','sgb')
       !write(out_unit,*) 'SBG basis'
       allocate(Basis_SBG_t :: basis)
       basis = init_Basis_SBG(BasisIn)
     CASE default
-      STOP 'no default'
+      write(out_unit,*) 'ERROR in ',name_sub
+      write(out_unit,*) ' basis name is incorrect, BasisIn%name: ',BasisIn%name
+      write(out_unit,*) ' Possible values: BoxAB, HO, DP, (SBG or SGB)'
+
+      STOP 'ERROR in ReadInit_Basis@Basis_m: basis name is incorrect'
     END SELECT
+    IF (print_level > 0 .OR. debug) write(out_unit,*) 'OOP basis init: done ',basis%name
+    IF (debug) CALL basis%write()
 
     basis%layer     = layer + 1
     basis%tab_layer = make_tab_layer(layer)
 
-    IF (basis%primitive) CALL basis%build()
-    
-    CALL BasisIn%dealloc()
+    IF (basis%primitive) THEN
+      CALL basis%build()
+    END IF
+    IF (print_level > 0 .OR. debug) write(out_unit,*) 'OOP basis build: done ',basis%name
+    IF (debug) CALL basis%write()
     
     SELECT TYPE (basis)
     TYPE IS(Basis_DP_t)
       DO ib=1,BasisIn%nb_basis
-        CALL Read_Basis(basis%tab_Pbasis(ib)%PBasis,basis%layer)
+        CALL ReadInit_Basis(basis%tab_Pbasis(ib)%PBasis,basis%layer)
       END DO
       CALL basis%Set_ndim()
       CALL basis%Set_tab_n_OF_l(-1)
       
     TYPE IS(Basis_SBG_t)
       DO ib=1,BasisIn%nb_basis
-        CALL Read_Basis(basis%tab_Pbasis(ib)%PBasis,basis%layer)
+        CALL ReadInit_Basis(basis%tab_Pbasis(ib)%PBasis,basis%layer,LG_in=basis%LG)
       END DO
       CALL basis%Set_ndim()
-      CALL basis%Set_tab_n_OF_l(basis%LG)
+      CALL basis%Set_tab_n_OF_l(-1)
     END SELECT
+    IF (print_level > 0 .OR. debug) write(out_unit,*) 'OOP basis recursive (DP SBG): done ',basis%name
+    IF (debug) CALL basis%write()
 
-  END SUBROUTINE Read_Basis
+    CALL BasisIn%dealloc()
+    !-----------------------------------------------------------------------
+    IF (debug) THEN
+      IF (allocated(basis)) THEN 
+        CALL basis%write()
+      ELSE
+        write(out_unit,*) 'basis is not allocated'
+      END IF
+      write(out_unit,*) 'END ',name_sub
+      flush(out_unit)
+    END IF
+    !-----------------------------------------------------------------------
+  END SUBROUTINE ReadInit_Basis
 
   FUNCTION make_tab_layer(layer) RESULT(tab_layer)
   USE QDUtil_m

@@ -36,7 +36,7 @@ MODULE Basis_SBG_m
     integer :: LG = -1
   CONTAINS
     PROCEDURE :: Write          => Write_Basis_SBG
-    PROCEDURE :: Set_tab_n_OF_l => Set_tab_n_OF_l_Basis_SBG
+    !PROCEDURE :: Set_tab_n_OF_l => Set_tab_n_OF_l_Basis_SBG
   END TYPE Basis_SBG_t
 
   PUBLIC :: Basis_SBG_t,init_Basis_SBG
@@ -55,21 +55,33 @@ CONTAINS
     this%name = 'SBG'
     IF (basisIn%nb_basis < 1) STOP ' ERROR in init_Basis_SBG: nb_basis < 1'
     allocate(this%tab_Pbasis(basisIn%nb_basis))
+    this%LB = basisIn%LB
+    this%LG = basisIn%LG
 
   END FUNCTION init_Basis_SBG
 
-  RECURSIVE SUBROUTINE Write_Basis_SBG(this)
+  RECURSIVE SUBROUTINE Write_Basis_SBG(this,nio,info)
     USE QDUtil_m
 
-    CLASS (Basis_SBG_t), intent(in) :: this
+    CLASS (Basis_SBG_t),  intent(in)           :: this
+    integer,              intent(in), optional :: nio
+    character (len=*),    intent(in), optional :: info
 
-    write(out_unit,*) this%tab_layer,'---- SBG ----------------------------'
-    CALL this%Basis_DP_t%write()
+    integer :: nio_loc
 
-    write(out_unit,*) this%tab_layer,'SBG: nb_basis',size(this%tab_Pbasis)
-    write(out_unit,*) this%tab_layer,'LB=',this%LB
-    write(out_unit,*) this%tab_layer,'LG=',this%LG
-    write(out_unit,*) this%tab_layer,'---- END SBG -------------------------'
+    IF (present(nio)) THEN
+      nio_loc = nio
+    ELSE
+      nio_loc = out_unit
+    END IF
+
+    write(nio_loc,*) this%tab_layer,'---- SBG ----------------------------'
+    CALL this%Basis_DP_t%write(nio=nio_loc)
+
+    write(nio_loc,*) this%tab_layer,'SBG: nb_basis',size(this%tab_Pbasis)
+    write(nio_loc,*) this%tab_layer,'LB=',this%LB
+    write(nio_loc,*) this%tab_layer,'LG=',this%LG
+    write(nio_loc,*) this%tab_layer,'---- END SBG -------------------------'
 
   END SUBROUTINE Write_Basis_SBG
 
@@ -77,7 +89,7 @@ CONTAINS
     USE QDUtil_m, ONLY : Rkind, out_unit
 
     CLASS (Basis_SBG_t), intent(inout) :: this
-    integer,            intent(in)     :: LG_in
+    integer,             intent(in)    :: LG_in
 
     integer :: ib,l
 
@@ -93,7 +105,6 @@ CONTAINS
       this%tab_nq(0) = 1
 
       DO ib=1,size(this%tab_Pbasis)
-
         this%tab_nb(0) =  this%tab_nb(0) * this%tab_Pbasis(ib)%Pbasis%nb
         this%tab_nq(0) =  this%tab_nq(0) * this%tab_Pbasis(ib)%Pbasis%nq
       END DO

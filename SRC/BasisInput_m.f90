@@ -71,6 +71,25 @@ MODULE BasisInput_m
 
     namelist / basis / nb,nq,name,Q0,ScQ,A,B,nb_basis,LB,LG
 
+    !-----------------------------------------------------------------------
+    !logical, parameter :: debug=.TRUE.
+    logical, parameter :: debug=.FALSE.
+    character(len=*), parameter :: name_sub='Read_BasisInput@BasisInput_m'
+    !-----------------------------------------------------------------------
+    IF (debug) THEN
+      write(out_unit,*) 'BEGINNING ',name_sub
+      write(out_unit,*) 'max_ndim ',max_ndim
+      IF (present(LG_in)) THEN
+        write(out_unit,*) 'LG_in ',LG_in
+      ELSE
+        write(out_unit,*) 'LG_in: not present'
+      END IF
+      flush(out_unit)
+      CALL BasisInput%write()
+      flush(out_unit)
+    END IF
+    !-----------------------------------------------------------------------
+
     allocate(Q0(max_ndim))
     allocate(ScQ(max_ndim))
     allocate(A(max_ndim))
@@ -91,7 +110,11 @@ MODULE BasisInput_m
     B        = ONE
 
     read(*,basis)
-    !write(*,basis)
+    IF (debug) THEN 
+      write(*,basis)
+      flush(out_unit)
+    END IF
+
 
     BasisInput%nb_basis = nb_basis
 
@@ -109,6 +132,8 @@ MODULE BasisInput_m
       BasisInput%nq       = 0
       BasisInput%LB       = LG_in
       BasisInput%LG       = LG_in
+      BasisInput%LB_in    = LG_in
+      BasisInput%LG_in    = LG_in
     ELSE
       BasisInput%nb       = nb
       IF (nq < 1) nq = nb
@@ -117,36 +142,63 @@ MODULE BasisInput_m
       BasisInput%LG       = LG
     END IF
 
+    !-----------------------------------------------------------------------
+    IF (debug) THEN
+      CALL BasisInput%write()
+      write(out_unit,*) 'END ',name_sub
+      flush(out_unit)
+    END IF
+    !-----------------------------------------------------------------------
   END SUBROUTINE Read_BasisInput
-  SUBROUTINE Write_BasisInput(BasisInput)
+  SUBROUTINE Write_BasisInput(BasisInput,nio,info)
     USE QDUtil_m
 
-    CLASS (BasisInput_t), intent(in) :: BasisInput
+    CLASS (BasisInput_t), intent(in)           :: BasisInput
+    integer,              intent(in), optional :: nio
+    character (len=*),    intent(in), optional :: info
 
-    write(out_unit,*) '-------------------------------------'
-    write(out_unit,*) '--- BasisInput ----------------------'
-    write(out_unit,*) '-------------------------------------'
-    IF (allocated(BasisInput%name)) THEN
-      write(out_unit,*) 'name: ',BasisInput%name
+    integer :: nio_loc
+
+
+    IF (present(nio)) THEN
+      nio_loc =nio
     ELSE
-      write(out_unit,*) 'name: not initialized!'
+      nio_loc = out_unit
     END IF
-    write(out_unit,*) 'nb    =',BasisInput%nb
-    write(out_unit,*) 'nq    =',BasisInput%nq
 
-    write(out_unit,*) 'Q0    =',BasisInput%Q0
-    write(out_unit,*) 'ScQ   =',BasisInput%ScQ
+    write(nio_loc,*) '-------------------------------------'
+    IF (present(info)) THEN
+      write(nio_loc,*) '--- BasisInput: ',info
+    ELSE
+      write(nio_loc,*) '--- BasisInput ----------------------'
+    END IF
+    write(nio_loc,*) '-------------------------------------'
+    IF (allocated(BasisInput%name)) THEN
+      write(nio_loc,*) 'name: ',BasisInput%name
+    ELSE
+      write(nio_loc,*) 'name: not initialized!'
+    END IF
+    write(nio_loc,*) 'nb    =',BasisInput%nb
+    write(nio_loc,*) 'nq    =',BasisInput%nq
 
-    write(out_unit,*) 'A     =',BasisInput%A
-    write(out_unit,*) 'B     =',BasisInput%B
+    write(nio_loc,*) 'Q0    =',BasisInput%Q0
+    write(nio_loc,*) 'ScQ   =',BasisInput%ScQ
 
-    write(out_unit,*) 'LB    =',BasisInput%LB
-    write(out_unit,*) 'LG    =',BasisInput%LG
-    write(out_unit,*) 'LB_in =',BasisInput%LB_in
-    write(out_unit,*) 'LG_in =',BasisInput%LG_in
-    write(out_unit,*) '-------------------------------------'
-    write(out_unit,*) '--- END BasisInput ------------------'
-    write(out_unit,*) '-------------------------------------'
+    write(nio_loc,*) 'A     =',BasisInput%A
+    write(nio_loc,*) 'B     =',BasisInput%B
+
+    write(nio_loc,*) 'LB    =',BasisInput%LB
+    write(nio_loc,*) 'LG    =',BasisInput%LG
+    write(nio_loc,*) 'LB_in =',BasisInput%LB_in
+    write(nio_loc,*) 'LG_in =',BasisInput%LG_in
+    write(nio_loc,*) '-------------------------------------'
+    IF (present(info)) THEN
+      write(nio_loc,*) '--- BasisInput: ',info
+      write(nio_loc,*) '--- END BasisInput: ',info
+    ELSE
+    write(nio_loc,*) '--- END BasisInput ------------------'
+    END IF
+    write(nio_loc,*) '-------------------------------------'
   END SUBROUTINE Write_BasisInput
 
   SUBROUTINE dealloc_BasisInput(BasisInput)

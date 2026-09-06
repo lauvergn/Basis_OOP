@@ -59,6 +59,7 @@ MODULE Basis_base_m
 
   CONTAINS
     PROCEDURE :: Write          => Write_Basis_base
+    !PROCEDURE :: Dealloc        => Dealloc_Basis_base
 
     PROCEDURE :: Set_tab_n_OF_l => Set_tab_n_OF_l_Basis_base
     PROCEDURE :: Get_nb         => Get_nb_Basis_base
@@ -84,7 +85,7 @@ MODULE Basis_base_m
 
   PUBLIC :: Basis_t,Init_Basis
 
-  CONTAINS
+CONTAINS
   FUNCTION Init_Basis(basisIn) RESULT(this)
     USE QDUtil_m
     USE BasisInput_m
@@ -98,95 +99,182 @@ MODULE Basis_base_m
 
   END FUNCTION init_Basis
 
-  SUBROUTINE Write_Basis_base(this)
+  SUBROUTINE Dealloc_Basis_base(this)
+    USE ADdnSVM_m
+    CLASS (Basis_t), intent(inout) :: this
+
+    integer :: l
+
+    IF (allocated(this%name)) deallocate(this%name)
+
+    IF (allocated(this%tab_nb)) deallocate(this%tab_nb)
+    IF (allocated(this%tab_nq)) deallocate(this%tab_nq)
+
+    IF (allocated(this%Q0)) deallocate(this%Q0)
+    IF (allocated(this%Q0)) deallocate(this%ScQ)
+
+    IF (allocated(this%X)) THEN
+      DO l=lbound(this%X,dim=1),ubound(this%X,dim=1)
+        CALL dealloc_dnMat(this%X(l))
+      END DO
+      deallocate(this%X)
+    END IF
+    IF (allocated(this%W)) THEN
+      DO l=lbound(this%W,dim=1),ubound(this%W,dim=1)
+        CALL dealloc_dnVec(this%W(l))
+      END DO
+      deallocate(this%W)
+    END IF
+
+    IF (allocated(this%GB)) THEN
+      DO l=lbound(this%GB,dim=1),ubound(this%GB,dim=1)
+        CALL dealloc_dnMat(this%GB(l))
+      END DO
+      deallocate(this%GB)
+    END IF
+    IF (allocated(this%BGW)) THEN
+      DO l=lbound(this%BGW,dim=1),ubound(this%BGW,dim=1)
+        CALL dealloc_dnMat(this%BGW(l))
+      END DO
+      deallocate(this%BGW)
+    END IF
+    IF (allocated(this%BB)) THEN
+      DO l=lbound(this%BB,dim=1),ubound(this%BB,dim=1)
+        CALL dealloc_dnMat(this%BB(l))
+      END DO
+      deallocate(this%BB)
+    END IF
+    IF (allocated(this%GG)) THEN
+      DO l=lbound(this%GG,dim=1),ubound(this%GG,dim=1)
+        CALL dealloc_dnMat(this%GG(l))
+      END DO
+      deallocate(this%GG)
+    END IF
+
+  END SUBROUTINE Dealloc_Basis_base
+  SUBROUTINE Write_Basis_base(this,nio,info)
     USE QDUtil_m, ONLY : Rkind, out_unit, TO_string
     USE ADdnSVM_m
-    CLASS (Basis_t), intent(in) :: this
+    CLASS (Basis_t),      intent(in) :: this
+    integer,              intent(in), optional :: nio
+    character (len=*),    intent(in), optional :: info
+
 
     character (len=4), parameter :: tab='    '
-    integer :: i,l
+    integer :: i,l,nio_loc
 
-    write(out_unit,*) this%tab_layer,'-------------------------------------'
-    IF (allocated(this%name)) THEN
-      write(out_unit,*) this%tab_layer,'name: ',this%name
+    IF (present(nio)) THEN
+      nio_loc =nio
     ELSE
-      write(out_unit,*) this%tab_layer,'name: not initialized!'
+      nio_loc = out_unit
     END IF
-    write(out_unit,*) this%tab_layer,'ndim=  ',this%ndim
-    write(out_unit,*) this%tab_layer,'primitive: ',this%primitive
+
+    write(nio_loc,*) this%tab_layer,'-------------------------------------'
+    IF (present(info)) write(nio_loc,*) this%tab_layer,info
+    IF (allocated(this%name)) THEN
+      write(nio_loc,*) this%tab_layer,'name: ',this%name
+    ELSE
+      write(nio_loc,*) this%tab_layer,'name: not initialized!'
+    END IF
+    write(nio_loc,*) this%tab_layer,'ndim=  ',this%ndim
+    write(nio_loc,*) this%tab_layer,'primitive: ',this%primitive
 
     IF (allocated(this%tab_nb)) THEN
-      write(out_unit,*) this%tab_layer,'tab_nb:    ',this%tab_nb
+      write(nio_loc,*) this%tab_layer,'tab_nb:    ',this%tab_nb
     ELSE
-      write(out_unit,*) this%tab_layer,'tab_nb:    not allocated'
+      write(nio_loc,*) this%tab_layer,'tab_nb:    not allocated'
     END IF
     IF (allocated(this%tab_nq)) THEN
-      write(out_unit,*) this%tab_layer,'tab_nq:    ',this%tab_nq
+      write(nio_loc,*) this%tab_layer,'tab_nq:    ',this%tab_nq
     ELSE
-      write(out_unit,*) this%tab_layer,'tab_nq:    not allocated'
+      write(nio_loc,*) this%tab_layer,'tab_nq:    not allocated'
     END IF
-    write(out_unit,*) this%tab_layer,'layer= ',this%layer
+    write(nio_loc,*) this%tab_layer,'layer= ',this%layer
 
     IF (allocated(this%Q0) .AND. allocated(this%ScQ)) THEN
-      write(out_unit,*) this%tab_layer,'Q0=  ',this%Q0
-      write(out_unit,*) this%tab_layer,'ScQ= ',this%ScQ
+      write(nio_loc,*) this%tab_layer,'Q0=  ',this%Q0
+      write(nio_loc,*) this%tab_layer,'ScQ= ',this%ScQ
     ELSE
-      write(out_unit,*) this%tab_layer,' Q0 or ScQ are not allocated'
+      write(nio_loc,*) this%tab_layer,' Q0 or ScQ are not allocated'
     END IF
 
 
-    write(out_unit,*)
     IF (allocated(this%X)) THEN
+      write(nio_loc,*)
       DO l=0,size(this%X)-1
-        CALL Write_dnMat(this%X(l), nio=out_unit, info='X(' // TO_string(l) // ')')
+        CALL Write_dnMat(this%X(l), nio=nio_loc, info='X(' // TO_string(l) // ')')
       END DO
     END IF
-    write(out_unit,*)
     IF (allocated(this%W)) THEN
+      write(nio_loc,*)
       DO l=0,size(this%W)-1
-        CALL Write_dnVec(this%W(l), nio=out_unit, info='W(' // TO_string(l) // ')')
+        CALL Write_dnVec(this%W(l), nio=nio_loc, info='W(' // TO_string(l) // ')')
       END DO
     END IF
 
-    write(out_unit,*)
     IF (allocated(this%GB)) THEN
+      write(nio_loc,*)
       DO l=0,size(this%GB)-1
-        CALL Write_dnMat(this%GB(l), nio=out_unit, info='GB(' // TO_string(l) // ')')
+        CALL Write_dnMat(this%GB(l), nio=nio_loc, info='GB(' // TO_string(l) // ')')
       END DO
     END IF
 
-    write(out_unit,*)
     IF (allocated(this%BGW)) THEN
+      write(nio_loc,*)
       DO l=0,size(this%BGW)-1
-        CALL Write_dnMat(this%BGW(l), nio=out_unit, info='BGW(' // TO_string(l) // ')')
+        CALL Write_dnMat(this%BGW(l), nio=nio_loc, info='BGW(' // TO_string(l) // ')')
       END DO
     END IF
 
-    write(out_unit,*)
     IF (allocated(this%BB)) THEN
+      write(nio_loc,*)
       DO l=0,size(this%BB)-1
-        CALL Write_dnMat(this%BB(l), nio=out_unit, info='BB(' // TO_string(l) // ')')
+        CALL Write_dnMat(this%BB(l), nio=nio_loc, info='BB(' // TO_string(l) // ')')
       END DO
     END IF
 
-    write(out_unit,*)
     IF (allocated(this%GG)) THEN
+      write(nio_loc,*)
       DO l=0,size(this%GG)-1
-        CALL Write_dnMat(this%GG(l), nio=out_unit, info='GG(' // TO_string(l) // ')')
+        CALL Write_dnMat(this%GG(l), nio=nio_loc, info='GG(' // TO_string(l) // ')')
       END DO
     END IF
+    IF (present(info)) write(nio_loc,*) this%tab_layer,info
+    write(nio_loc,*) this%tab_layer,'-------------------------------------'
 
-    write(out_unit,*) this%tab_layer,'-------------------------------------'
-
+    flush(nio_loc)
   END SUBROUTINE Write_Basis_base
 
   SUBROUTINE Set_tab_n_OF_l_Basis_base(this,LG_in)
-    !USE QDUtil_m, ONLY : out_unit
+    USE QDUtil_m, ONLY : out_unit
 
     CLASS (Basis_t), intent(inout) :: this
     integer,         intent(in)    :: LG_in
 
     integer :: l
+
+    !-----------------------------------------------------------------------
+    !logical, parameter :: debug=.TRUE.
+    logical, parameter :: debug=.FALSE.
+    character(len=*), parameter :: name_sub='Set_tab_n_OF_l_Basis_base@Basis_base_m'
+    !-----------------------------------------------------------------------
+    IF (debug) THEN
+      write(out_unit,*) 'BEGINNING ',name_sub
+      !CALL this%write()
+      write(out_unit,*) 'LG_in ',LG_in
+      IF (.NOT. allocated(this%tab_nb)) THEN
+        write(out_unit,*) 'tab_nb: not allocated'
+      ELSE
+        write(out_unit,*) 'tab_nb(0:) ',this%tab_nb
+      END IF
+      IF (.NOT. allocated(this%tab_nq)) THEN
+        write(out_unit,*) 'tab_nq: not allocated'
+      ELSE
+        write(out_unit,*) 'tab_nq(0:) ',this%tab_nq
+      END IF
+      flush(out_unit)
+    END IF
+    !-----------------------------------------------------------------------
 
     IF (LG_in > -1) THEN
 
@@ -203,6 +291,15 @@ MODULE Basis_base_m
       this%tab_nq(0) =  this%nq
     END IF
 
+    !-----------------------------------------------------------------------
+    IF (debug) THEN
+      !CALL this%write()
+      write(out_unit,*) 'tab_nb(0:) ',this%tab_nb
+      write(out_unit,*) 'tab_nq(0:) ',this%tab_nq
+      write(out_unit,*) 'END ',name_sub
+      flush(out_unit)
+    END IF
+    !-----------------------------------------------------------------------
   END SUBROUTINE Set_tab_n_OF_l_Basis_base
 
   FUNCTION Get_nb_Basis_base(this,l) RESULT(nb)
@@ -534,12 +631,10 @@ MODULE Basis_base_m
 
   END SUBROUTINE Scale_Basis_base
   SUBROUTINE Build_Basis_base(this)
-    USE QDUtil_m, ONLY : ZERO, ONE, out_unit
-    USE ADdnSVM_m
+    USE QDUtil_m, ONLY : out_unit
+    !USE ADdnSVM_m
 
     CLASS (Basis_t), intent(inout) :: this
-
-    integer           :: l,LG
 
     !CALL this%Set_tab_n_OF_l(BasisIn%LB_in,BasisIn%LG_in)
     CALL this%Set_Grid()
@@ -548,6 +643,10 @@ MODULE Basis_base_m
     CALL this%Set_BGW()
     CALL this%Set_BB()
     CALL this%Set_GG()
+
+    write(out_unit,*) 'basis:',this%name
+    write(out_unit,*) ' tab_nb:',this%tab_nb
+    write(out_unit,*) ' tab_nq:',this%tab_nq
     CALL this%CheckOrtho()
 
   END SUBROUTINE Build_Basis_base

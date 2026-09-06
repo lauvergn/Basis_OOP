@@ -30,17 +30,24 @@ MODULE QDUtil_NumParameters_m
   !$ USE omp_lib
   USE, intrinsic :: ISO_FORTRAN_ENV, ONLY : INPUT_UNIT,OUTPUT_UNIT,real32,real64,real128,int32,int64
   IMPLICIT NONE
+#ifndef __WITHRK16
+#define __WITHRK16 1
+#endif
 
   PUBLIC
   PRIVATE :: INPUT_UNIT,OUTPUT_UNIT,real32,real64,real128,int32,int64
 
   integer, parameter :: RkS        = real32 ! 4
   integer, parameter :: RkD        = real64 ! 8
-  integer, parameter :: RkQ        = real128 ! 16
   integer, parameter :: Rk4        = real32 ! 4
   integer, parameter :: Rk8        = real64 ! 8
+#if __WITHRK16 == 0
+  integer, parameter :: Rk16       = -1
+  integer, parameter :: RkQ        = -1
+#else
   integer, parameter :: Rk16       = real128 ! 16
-
+  integer, parameter :: RkQ        = real128 ! 16
+#endif
   integer, parameter :: IkS        = int32  ! 4
   integer, parameter :: IkD        = int64  ! 8
   integer, parameter :: Ik4        = int32  ! 4
@@ -52,9 +59,6 @@ MODULE QDUtil_NumParameters_m
 #else
       real64
 #endif
-  !integer, parameter :: Rkind      = real32 ! 4
-  !integer, parameter :: Rkind      = real64 ! 8
-  !integer, parameter :: Rkind      = real128 ! 8
   integer, parameter :: Ikind      = int32  ! 4
   integer, parameter :: ILkind     = int64  ! 8
 
@@ -91,9 +95,11 @@ MODULE QDUtil_NumParameters_m
   real(kind=Rk8), parameter :: pi_Rk8         = &
                 3.14159265358979323846264338327950288419716939937511_Rk8
 
+#if __WITHRK16 == 1
   real(kind=Rk16), parameter :: pi_Rk16         = &
                  3.14159265358979323846264338327950288419716939937511_Rk16
-  
+#endif
+
   complex (kind=Rkind), parameter :: EYE      = (ZERO,ONE)
   complex (kind=Rkind), parameter :: CZERO    = (ZERO,ZERO)
   complex (kind=Rkind), parameter :: CONE     = (ONE,ZERO)
@@ -177,7 +183,15 @@ CONTAINS
 #else
       write(out_unit,*) '  Lapack library is linked'
 #endif
+#if __WITHRK16 == 1
+      write(out_unit,*) 'Reals with quadruple precision (real128) are available'
+#else
+    write(out_unit,*) 'Reals with quadruple precision (real128) are NOT available'
+#endif
+      write(out_unit,*) '  WITHRK16',__WITHRK16
+      write(out_unit,*) '  Rk16',Rk16
       write(out_unit,*) '  Rkind',Rkind
+
       write(out_unit,*) '=================================================' 
     END IF
     

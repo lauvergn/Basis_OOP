@@ -27,6 +27,11 @@
 !===============================================================================
 !===============================================================================
 MODULE QDUtil_Quadrature_Rk16_m
+#ifndef __WITHRK16
+#define __WITHRK16 1
+#endif
+#if __WITHRK16 == 1
+
   USE QDUtil_NumParameters_m, ONLY : out_unit, print_level, Rkind => Rk16, pi => pi_Rk16
   IMPLICIT NONE
 
@@ -80,7 +85,7 @@ MODULE QDUtil_Quadrature_Rk16_m
     USE QDUtil_LegendreP_Rk16_m
     IMPLICIT NONE
 
-    TYPE (Quadrature_Rk16_t), intent(inout)         :: Quadrature
+    TYPE (Quadrature_Rk16_t), intent(inout)        :: Quadrature
     integer,                 intent(in)            :: nq
     character (len=*),       intent(in)            :: name
     real (kind=Rkind),       intent(in),  optional :: A,B
@@ -719,4 +724,6 @@ MODULE QDUtil_Quadrature_Rk16_m
     !-----------------------------------------------------------
 
   END SUBROUTINE Test_QuadratureLegendre_Rk16_QDUtil
+#endif
+
 END MODULE QDUtil_Quadrature_Rk16_m

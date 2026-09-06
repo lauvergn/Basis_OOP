@@ -34,10 +34,11 @@ do
     ext=$FC"_Opt"$OPT"_OMP"$OMP"_LAPACK"$LAPACK"_INT"$INT"_RKIND"$RKIND
     RES="res_dnSV_dnPoly_"$ext
     LOG="comp_"$ext".log"
-    make F90=$FC OPT=$OPT OMP=$OMP LAPACK=$LAPACK INT=$INT RKIND=$RKIND lib > $here/$LOG 2>&1
-    make F90=$FC OPT=$OPT OMP=$OMP LAPACK=$LAPACK INT=$INT RKIND=$RKIND ut  > $here/$RES 2> $here/$LOG
+    make FC=$FC OPT=$OPT OMP=$OMP LAPACK=$LAPACK INT=$INT RKIND=$RKIND ut > $here/$LOG 2>&1
+    rm -f lib*a Test*.x
+    mv Test.log $here/$RES
   cd  $here
-  #grep "Number of error" $RES  >> ALL_Tests.log
+  #grep TESTING $RES >> ALL_Tests.log
   grep ERROR $here/$LOG >> ALL_Tests.log
   awk  -F: 'BEGIN{test=0} /Number of tests/ {test+=$2} END {print "Number of tests: " test}'                 $RES >> ALL_Tests.log
 	awk  -F: 'BEGIN{err=0}  /Number of error/ {err+=$2}  END {print "Number of error(s) for all tests: " err}' $RES >> ALL_Tests.log

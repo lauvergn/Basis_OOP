@@ -35,7 +35,9 @@ MODULE Basis_HO_m
   TYPE, EXTENDS (Basis_t) :: Basis_HO_t
 
   CONTAINS
-    PROCEDURE :: Write  => Write_Basis_HO
+    PROCEDURE :: Write     => Write_Basis_HO
+    PROCEDURE :: Set_Grid  => Set_Grid_Basis_HO
+    PROCEDURE :: Set_GB    => Set_GB_Basis_HO
   END TYPE Basis_HO_t
 
   PUBLIC :: Basis_HO_t,init_Basis_HO
@@ -59,14 +61,101 @@ MODULE Basis_HO_m
     this%ScQ        = basisIn%ScQ(1:1)
 
   END FUNCTION init_Basis_HO
-  SUBROUTINE Write_Basis_HO(this)
+  SUBROUTINE Write_Basis_HO(this,nio,info)
     USE QDUtil_m, ONLY : Rkind, out_unit
 
-    CLASS (Basis_HO_t), intent(in) :: this
+    CLASS (Basis_HO_t),   intent(in)           :: this
+    integer,              intent(in), optional :: nio
+    character (len=*),    intent(in), optional :: info
 
-    write(out_unit,*) this%tab_layer,'-------------------------------------'
-    CALL this%Basis_t%write()
-    write(out_unit,*) this%tab_layer,'-------------------------------------'
+    integer :: nio_loc
+
+    IF (present(nio)) THEN
+      nio_loc = nio
+    ELSE
+      nio_loc = out_unit
+    END IF
+
+    write(nio_loc,*) this%tab_layer,'-------------------------------------'
+    CALL this%Basis_t%write(nio=nio_loc)
+    write(nio_loc,*) this%tab_layer,'-------------------------------------'
 
   END SUBROUTINE Write_Basis_HO
+
+  SUBROUTINE Set_Grid_Basis_HO(this)
+    USE QDUtil_m, ONLY : Rkind, out_unit, Quadrature_t, Init_Quadrature_HP, dealloc_Quadrature
+
+    CLASS (Basis_HO_t), intent(inout) :: this
+
+    integer :: l,LG,nql
+
+    TYPE (Quadrature_t) :: xw
+    integer :: err
+
+    IF (allocated(this%tab_nq)) THEN
+
+      LG = size(this%tab_nq)-1
+      allocate(this%X(0:LG))
+      allocate(this%W(0:LG))
+
+      DO l=0,LG
+        nql = this%get_nq(l)
+        CALL Init_Quadrature_HP(xw,nql,name='HO',err=err)
+        IF (err /=0) THEN
+          write(out_unit,*) 'ERROR in Set_Grid_Basis_HO'
+          write(out_unit,*) 'Problem with the "Init_Quadrature_HP" subroutine (QDUtil module)'
+          STOP 'ERROR in Set_Grid_Basis_HO: Problem with the "Init_Quadrature_HP" subroutine (QDUtil module)'
+        END IF
+        this%X(l) = xw%x
+        this%W(l) = xw%w
+      END DO
+      CALL dealloc_Quadrature(xw)
+    ELSE
+      write(out_unit,*) 'ERROR in Set_Grid_Basis_HO'
+      write(out_unit,*) 'tab_nq is not allocated'
+      STOP 'ERROR in Set_Grid_Basis_HO: tab_nq is not allocated'
+    END IF
+
+  END SUBROUTINE Set_Grid_Basis_HO
+
+  SUBROUTINE Set_GB_Basis_HO(this)
+    USE QDUtil_m, ONLY : Rkind, ZERO, HALF, PI, out_unit
+    USE ADdnSVM_m
+
+    CLASS (Basis_HO_t), intent(inout) :: this
+
+    integer           :: l,LG,nql,nbl,iq,ib
+    TYPE (dnS_t)      :: dnx,dnB
+    real (kind=Rkind) :: xiq
+
+    IF (allocated(this%tab_nq) .AND. allocated(this%tab_nb)) THEN
+
+      LG = size(this%tab_nq)-1
+      allocate(this%GB(0:LG))
+
+      DO l=0,LG
+        nql = this%get_nq(l)
+        nbl = this%get_nb(l)
+
+        CALL alloc_dnMat(this%GB(l),sizeL=nql, sizeC=nbl, nVar=1, nderiv=2)
+
+        DO iq=1,nql
+          xiq = this%X(l)%d0(1,iq)
+
+          dnx = Variable(xiq, nvar=1, nderiv=2)
+
+          DO ib=1,nbl
+            dnB = dnExpHermite(dnX,ib-1,ReNorm=.TRUE.)
+            CALL dnS_TO_dnMat(dnB,this%GB(l),i=iq,j=ib)
+          END DO
+
+        END DO
+      END DO
+    ELSE
+      write(out_unit,*) 'ERROR in Set_GB_Basis_HO'
+      write(out_unit,*) 'tab_nq or tab_nb are not allocated'
+      STOP 'ERROR in Set_GB_Basis_HO: tab_nq or tab_nb are not allocated'
+    END IF
+
+  END SUBROUTINE Set_GB_Basis_HO
 END MODULE Basis_HO_m

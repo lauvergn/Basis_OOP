@@ -64,21 +64,31 @@ MODULE Basis_BoxAB_m
     this%ScQ        = PI/(this%B-this%A)
 
   END FUNCTION init_Basis_BoxAB
-  SUBROUTINE Write_Basis_BoxAB(this)
+  SUBROUTINE Write_Basis_BoxAB(this,nio,info)
     USE QDUtil_m, ONLY : Rkind, out_unit
 
-    CLASS (Basis_BoxAB_t), intent(in) :: this
+    CLASS (Basis_BoxAB_t), intent(in)           :: this
+    integer,               intent(in), optional :: nio
+    character (len=*),     intent(in), optional :: info
 
-    write(out_unit,*) this%tab_layer,'-------------------------------------'
-    CALL this%Basis_t%write()
-    IF (allocated(this%A) .AND. allocated(this%B)) THEN
-      write(out_unit,*) this%tab_layer,'A= ',this%A
-      write(out_unit,*) this%tab_layer,'B= ',this%B
+    integer :: nio_loc
+
+    IF (present(nio)) THEN
+      nio_loc = nio
     ELSE
-      write(out_unit,*) this%tab_layer,' A or B are not allocated'
+      nio_loc = out_unit
     END IF
 
-    write(out_unit,*) this%tab_layer,'-------------------------------------'
+    write(nio_loc,*) this%tab_layer,'-------------------------------------'
+    CALL this%Basis_t%write(nio=nio_loc)
+    IF (allocated(this%A) .AND. allocated(this%B)) THEN
+      write(nio_loc,*) this%tab_layer,'A= ',this%A
+      write(nio_loc,*) this%tab_layer,'B= ',this%B
+    ELSE
+      write(nio_loc,*) this%tab_layer,' A or B are not allocated'
+    END IF
+
+    write(nio_loc,*) this%tab_layer,'-------------------------------------'
 
   END SUBROUTINE Write_Basis_BoxAB
 

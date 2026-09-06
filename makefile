@@ -2,12 +2,9 @@
 #=================================================================================
 # Compiler?
 #Possible values: (Empty: gfortran)
-#                ifort (version: 19. linux)
-#                gfortran (version: 9. linux and osx)
-#                nagfor (version 7.0, osx)
+#                gfortran (version: 11, 12, 13, 14, 15 linux and osx)
  FC = gfortran
 #FC = ifort
-#FC = nagfor
 #
 # Optimize? Empty: default Optimization; 0: No Optimization; 1 Optimzation
 OPT = 0
@@ -127,10 +124,11 @@ $(info ***********LIBA:              $(LIBA))
 all: exe ut
 
 # Example Exa_QDBa
-.PHONY: exe
-exe :$(EXA_QDBaEXE)
+.PHONY: app exe
+exe :app
 	./$(EXA_QDBaEXE) < Tests/dat_DP  > Tests/Test.log
 	@echo "execution"
+app :$(EXA_QDBaEXE)
 $(EXA_QDBaEXE): $(OBJ_DIR)/Exa_QDBa.o $(LIBA)
 	$(FFC) $(FFLAGS)   -o $(EXA_QDBaEXE) $(OBJ_DIR)/Exa_QDBa.o $(LIBA) $(EXTLib) $(FLIB)
 	@echo "Exa_QDBa compilation: OK"

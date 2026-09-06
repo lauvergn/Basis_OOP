@@ -64,33 +64,40 @@ MODULE Basis_DP_m
 
   END FUNCTION init_Basis_DP
 
-  RECURSIVE SUBROUTINE Write_Basis_DP(this)
+  RECURSIVE SUBROUTINE Write_Basis_DP(this,nio,info)
     USE QDUtil_m
 
-    CLASS (Basis_DP_t), intent(in) :: this
+    CLASS (Basis_DP_t),   intent(in)           :: this
+    integer,              intent(in), optional :: nio
+    character (len=*),    intent(in), optional :: info
 
-    integer :: ib
+    integer :: ib,nio_loc
 
-    write(out_unit,*) this%tab_layer,'-------------------------------------'
-    CALL this%Basis_t%write()
-    write(out_unit,*) this%tab_layer,'DP: nb_basis',size(this%tab_Pbasis)
+    IF (present(nio)) THEN
+      nio_loc = nio
+    ELSE
+      nio_loc = out_unit
+    END IF
+
+    write(nio_loc,*) this%tab_layer,'-------------------------------------'
+    CALL this%Basis_t%write(nio=nio_loc)
+    write(nio_loc,*) this%tab_layer,'DP: nb_basis',size(this%tab_Pbasis)
 
     IF (allocated(this%tab_Pbasis)) THEN
 
       DO ib=1,size(this%tab_Pbasis)
-        write(out_unit,*) this%tab_layer,'ib: ',ib
+        write(nio_loc,*) this%tab_layer,'ib: ',ib
 
         IF (allocated(this%tab_Pbasis(ib)%Pbasis)) THEN
-          CALL this%tab_Pbasis(ib)%Pbasis%write()
+          CALL this%tab_Pbasis(ib)%Pbasis%write(nio=nio_loc)
         ELSE
-          write(out_unit,*) this%tab_layer,'DP: Pbasis is not allocated'
+          write(nio_loc,*) this%tab_layer,'DP: Pbasis is not allocated'
         END IF
       END DO
     ELSE
-      write(out_unit,*) this%tab_layer,'DP: tab_Pbasis is not allocated'
+      write(nio_loc,*) this%tab_layer,'DP: tab_Pbasis is not allocated'
     END IF
-
-    write(out_unit,*) this%tab_layer,'-------------------------------------'
+    write(nio_loc,*) this%tab_layer,'-------------------------------------'
   END SUBROUTINE Write_Basis_DP
 
   SUBROUTINE Set_ndim_Basis_DP(this)
